@@ -1,0 +1,12 @@
+# Maven / NetBeans: tudo isso é gerado no Clean and Build
+target/
+nbproject/private/
+nbactions.xml
+nb-configuration.xml
+
+# outras IDEs e sistema
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db

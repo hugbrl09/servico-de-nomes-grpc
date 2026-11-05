@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia Serviço de Nomes</title>
+<style>
+:root{
+  --ui:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+  --mono:Consolas,"Cascadia Mono","DejaVu Sans Mono",Menlo,monospace;
+  --bg:#f2f2f2;--chrome:#e9e9e9;--chrome2:#f7f7f7;--panel:#ffffff;--line:#c9c9c9;--line2:#dddddd;
+  --text:#1e1e1e;--muted:#6b6b6b;--sel:#d5e3f7;--selline:#2675bf;--hover:#e6eef9;
+  --editor:#ffffff;--gutter:#f3f3f3;--gutterText:#8f8f8f;--curline:#eef4fd;
+  --kw:#0000e6;--str:#ce7b00;--com:#969696;--ann:#808000;--num:#1e1e1e;--type:#1e1e1e;--decl:#000000;
+  --addBg:#e2f5e2;--addBar:#3aa53a;--addText:#1d7a1d;
+  --modBg:#fff0cc;--modBar:#e0a024;--modText:#9a6400;
+  --delBar:#d64545;--delBg:#fbe3e3;--delText:#b22b2b;
+  --fold:#f0f0f0;--foldLine:#b5b5b5;
+  --out:#ffffff;--outText:#1e1e1e;--outOk:#1d7a1d;--outErr:#c62828;--outInfo:#2a62b8;
+  --title:#dcdcdc;--tab:#e4e4e4;--tabActive:#ffffff;--accent:#2675bf;
+  --pop:#ffffff;--shadow:0 6px 24px rgba(0,0,0,.18);
+  --scroll:rgba(0,0,0,.2);--scrollHover:rgba(0,0,0,.38);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#2b2b2b;--chrome:#3c3f41;--chrome2:#45494a;--panel:#2f3133;--line:#1f1f1f;--line2:#4a4d50;
+    --text:#d6d6d6;--muted:#9a9a9a;--sel:#2f4b6e;--selline:#4b8fd6;--hover:#3a4553;
+    --editor:#232425;--gutter:#2e3032;--gutterText:#777;--curline:#2b3038;
+    --kw:#cc7832;--str:#6a8759;--com:#808080;--ann:#bbb529;--num:#6897bb;--type:#d6d6d6;--decl:#ffc66d;
+    --addBg:#26402a;--addBar:#4fb34f;--addText:#7fd67f;
+    --modBg:#47391a;--modBar:#e0a024;--modText:#f0c060;
+    --delBar:#e05555;--delBg:#4a2626;--delText:#f08a8a;
+    --fold:#3a3d40;--foldLine:#666;
+    --out:#1f2021;--outText:#cfcfcf;--outOk:#7fd67f;--outErr:#ff7b7b;--outInfo:#79aef0;
+    --title:#3c3f41;--tab:#3a3d3f;--tabActive:#2b2b2b;--accent:#4b8fd6;
+    --pop:#3c3f41;--shadow:0 6px 24px rgba(0,0,0,.5);
+    --scroll:rgba(255,255,255,.18);--scrollHover:rgba(255,255,255,.34);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#2b2b2b;--chrome:#3c3f41;--chrome2:#45494a;--panel:#2f3133;--line:#1f1f1f;--line2:#4a4d50;
+  --text:#d6d6d6;--muted:#9a9a9a;--sel:#2f4b6e;--selline:#4b8fd6;--hover:#3a4553;
+  --editor:#232425;--gutter:#2e3032;--gutterText:#777;--curline:#2b3038;
+  --kw:#cc7832;--str:#6a8759;--com:#808080;--ann:#bbb529;--num:#6897bb;--type:#d6d6d6;--decl:#ffc66d;
+  --addBg:#26402a;--addBar:#4fb34f;--addText:#7fd67f;
+  --modBg:#47391a;--modBar:#e0a024;--modText:#f0c060;
+  --delBar:#e05555;--delBg:#4a2626;--delText:#f08a8a;
+  --fold:#3a3d40;--foldLine:#666;
+  --out:#1f2021;--outText:#cfcfcf;--outOk:#7fd67f;--outErr:#ff7b7b;--outInfo:#79aef0;
+  --title:#3c3f41;--tab:#3a3d3f;--tabActive:#2b2b2b;--accent:#4b8fd6;
+  --pop:#3c3f41;--shadow:0 6px 24px rgba(0,0,0,.5);
+  --scroll:rgba(255,255,255,.18);--scrollHover:rgba(255,255,255,.34);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:13px/1.45 var(--ui);overflow:hidden}
+button{font:inherit;color:inherit}
+
+/* barras de rolagem finas e arredondadas, no estilo do FlatLaf do NetBeans */
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--scroll);background-clip:padding-box;border:3px solid transparent;border-radius:8px;min-height:32px;min-width:32px}
+::-webkit-scrollbar-thumb:hover{background:var(--scrollHover);background-clip:padding-box;border-width:2px}
+::-webkit-scrollbar-button{display:none}
+/* na barra de abas ela fica bem fina e só aparece com o mouse em cima */
+.etabs::-webkit-scrollbar{height:4px}
+.etabs::-webkit-scrollbar-thumb{background:transparent;border:0;border-radius:2px;min-width:40px}
+.etabs:hover::-webkit-scrollbar-thumb{background:var(--scroll)}
+.etabs::-webkit-scrollbar-thumb:hover{background:var(--scrollHover)}
+/* Firefox não tem ::-webkit-scrollbar: usa a versão fina padrão com as mesmas cores */
+@supports not selector(::-webkit-scrollbar){
+  *{scrollbar-width:thin;scrollbar-color:var(--scroll) transparent}
+}
+.ide{display:grid;grid-template-rows:auto auto auto 1fr auto;height:100vh;height:100dvh}
+
+/* title + menu */
+.titlebar{display:flex;align-items:center;gap:10px;background:var(--title);padding:5px 10px;border-bottom:1px solid var(--line);font-size:12.5px}
+.titlebar .logo{width:16px;height:16px;flex:none}
+.titlebar .ttl{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titlebar .win{display:flex;gap:16px;color:var(--muted);font-size:12px;user-select:none}
+.menubar{display:flex;gap:2px;background:var(--chrome2);border-bottom:1px solid var(--line2);padding:1px 6px;overflow:hidden;white-space:nowrap}
+.menubar span{padding:3px 8px;border-radius:3px;color:var(--text);cursor:default}
+
+/* toolbar */
+.toolbar{display:flex;align-items:center;gap:4px;background:var(--chrome2);border-bottom:1px solid var(--line);padding:4px 8px;flex-wrap:wrap}
+.tb{display:inline-grid;place-items:center;width:28px;height:26px;border:1px solid transparent;border-radius:4px;background:none;cursor:pointer;padding:0}
+.tb:hover{background:var(--hover);border-color:var(--line2)}
+.tb svg{width:18px;height:18px}
+.tb[disabled]{opacity:.45;cursor:default}
+.sep{width:1px;height:20px;background:var(--line2);margin:0 4px}
+.legend{display:flex;gap:12px;margin-left:auto;align-items:center;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+
+/* main split */
+.main{display:grid;grid-template-columns:var(--leftw,clamp(300px,31vw,360px)) 4px minmax(0,1fr);min-height:0}
+.left{display:grid;grid-template-rows:1fr 4px var(--navh,42%);grid-template-columns:minmax(0,1fr);min-width:0;min-height:0;background:var(--panel);border-right:1px solid var(--line)}
+.splitter{background:var(--chrome);cursor:col-resize}
+.hsplit{background:var(--chrome);cursor:row-resize}
+.panel{display:flex;flex-direction:column;min-width:0;min-height:0}
+.ptabs{display:flex;background:var(--chrome);border-bottom:1px solid var(--line);min-height:27px;overflow:hidden}
+.ptab{padding:4px 12px;border:none;border-right:1px solid var(--line2);background:var(--tab);cursor:pointer;white-space:nowrap;font-size:12.5px}
+.ptab.on{background:var(--panel);font-weight:600;box-shadow:inset 0 2px 0 var(--accent)}
+.ptabs .grow{flex:1}
+.pbody{flex:1;overflow:auto;min-height:0}
+
+/* tree */
+.tree{list-style:none;margin:0;padding:4px 0 10px}
+.tree ul{list-style:none;margin:0;padding:0}
+.node{display:flex;align-items:center;gap:4px;padding:1px 6px 1px calc(6px + var(--d,0) * 16px);cursor:pointer;white-space:nowrap;user-select:none;min-height:21px}
+.node:hover{background:var(--hover)}
+.node.sel{background:var(--sel)}
+.node .tw{width:12px;flex:none;color:var(--muted);font-size:9px;text-align:center}
+.node svg{width:16px;height:16px;flex:none}
+.node .nm{overflow:hidden;text-overflow:ellipsis}
+.node.novo .nm{color:var(--addText);font-weight:600}
+.node.alterado .nm{color:var(--modText);font-weight:600}
+.node .badge{font:700 9.5px/1 var(--ui);padding:2px 4px;border-radius:3px;margin-left:4px;letter-spacing:.3px}
+.badge.novo{background:var(--addBg);color:var(--addText);border:1px solid var(--addBar)}
+.badge.alterado{background:var(--modBg);color:var(--modText);border:1px solid var(--modBar)}
+.node .dot{width:6px;height:6px;border-radius:50%;background:var(--modBar);margin-left:2px;flex:none}
+.node.dim{color:var(--muted);cursor:default}
+.node.dim:hover{background:none}
+.node .hint{color:var(--muted);font-size:11px;margin-left:6px}
+.collapsed > ul{display:none}
+
+/* navigator / roteiro */
+.steps{list-style:none;margin:0;padding:6px 6px 14px}
+.step{display:grid;grid-template-columns:22px 1fr;gap:8px;padding:6px 6px;border-radius:4px;cursor:pointer;align-items:start}
+.step:hover{background:var(--hover)}
+.step.sel{background:var(--sel)}
+.step .n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--chrome);font-weight:700;font-size:11px;border:1px solid var(--line2)}
+.step .t{font-weight:600;line-height:1.3}
+.step .s{color:var(--muted);font-size:11.5px;line-height:1.35;margin-top:1px}
+.step .tag{font:700 9.5px/1 var(--ui);padding:2px 4px;border-radius:3px;margin-right:4px;vertical-align:1px}
+.tag.novo{background:var(--addBg);color:var(--addText);border:1px solid var(--addBar)}
+.tag.alterado{background:var(--modBg);color:var(--modText);border:1px solid var(--modBar)}
+.tag.run{background:var(--sel);color:var(--text);border:1px solid var(--selline)}
+
+/* center */
+.center{display:grid;grid-template-rows:1fr 4px var(--both,34%);grid-template-columns:minmax(0,1fr);min-width:0;min-height:0}
+.editor{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--editor)}
+.etabs{display:flex;position:relative;background:var(--chrome);border-bottom:1px solid var(--line);overflow-x:auto;min-width:0;min-height:28px;flex:none}
+.etab{flex:none;display:flex;align-items:center;gap:6px;padding:4px 8px 4px 10px;border:none;border-right:1px solid var(--line2);background:var(--tab);cursor:pointer;white-space:nowrap;font-size:12.5px}
+.etab.on{background:var(--tabActive);box-shadow:inset 0 2px 0 var(--accent)}
+.etab.novo .lbl{color:var(--addText);font-weight:600}
+.etab.alterado .lbl{color:var(--modText);font-weight:600}
+.etab .x{border:none;background:none;width:16px;height:16px;border-radius:3px;cursor:pointer;color:var(--muted);display:grid;place-items:center;padding:0;font-size:13px;line-height:1}
+.etab .x:hover{background:var(--hover);color:var(--text)}
+.etab svg{width:14px;height:14px}
+.etool{display:flex;align-items:center;gap:6px;padding:3px 8px;border-bottom:1px solid var(--line2);background:var(--chrome2);flex-wrap:wrap;min-height:30px}
+.etool .seg{display:flex;border:1px solid var(--line2);border-radius:4px;overflow:hidden}
+.etool .seg button{border:none;background:var(--panel);padding:2px 10px;cursor:pointer;font-size:12px}
+.etool .seg button.on{background:var(--sel);font-weight:600}
+.etool .seg button[disabled]{color:var(--muted);cursor:default}
+.crumb{font:12px var(--mono);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:120px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line2);background:var(--panel);border-radius:4px;padding:3px 9px;cursor:pointer;font-size:12px;white-space:nowrap}
+.btn:hover{background:var(--hover)}
+.btn svg{width:14px;height:14px}
+.btn.primary{border-color:var(--selline)}
+/* feedback de cópia no próprio botão */
+.btn.copied,.hcopy.copied{background:var(--addBg);border-color:var(--addBar);color:var(--addText);font-weight:600}
+.btn.copyfail,.hcopy.copyfail{background:var(--delBg);border-color:var(--delBar);color:var(--delText);font-weight:600}
+.copied,.copyfail{animation:copiado .28s ease-out}
+@keyframes copiado{0%{transform:scale(.94)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.copied,.copyfail{animation:none}}
+.chg{font-size:12px;color:var(--muted);white-space:nowrap}
+
+.codewrap{position:relative;flex:1;min-height:0;display:flex}
+.code{flex:1;overflow:auto;font:13px/19px var(--mono);tab-size:4;min-width:0;position:relative}
+.ruler{width:12px;flex:none;border-left:1px solid var(--line2);background:var(--gutter);position:relative;cursor:pointer}
+.ruler i{position:absolute;left:2px;right:2px;min-height:3px;border-radius:1px}
+.ruler i.a{background:var(--addBar)}.ruler i.m{background:var(--modBar)}.ruler i.d{background:var(--delBar)}
+.inner{width:max-content;min-width:100%;padding-bottom:28px}
+.ln{display:grid;grid-template-columns:var(--gw,52px) 14px 6px 1fr;position:relative}
+.ln .no{background:var(--gutter);color:var(--gutterText);text-align:right;padding-right:6px;user-select:none;position:sticky;left:0;z-index:2}
+.ln .fd{background:var(--gutter);color:var(--muted);user-select:none;text-align:center;cursor:default;font-size:10px;position:sticky;left:var(--gw,52px);z-index:2}
+.ln .fd.can{cursor:pointer}
+.ln .fd.can:hover{color:var(--text)}
+.ln .bar{background:var(--gutter);position:sticky;left:calc(var(--gw,52px) + 14px);z-index:2}
+.ln .tx{white-space:pre;padding:0 24px 0 8px}
+.ln.a .tx{background:var(--addBg)}
+.ln.a .bar{background:var(--addBar)}
+.ln.m .tx{background:var(--modBg)}
+.ln.m .bar{background:var(--modBar);cursor:pointer}
+.ln.cur .tx{box-shadow:inset 0 0 0 1px var(--selline)}
+.ln.ghost .tx{background:repeating-linear-gradient(135deg,transparent 0 6px,var(--line2) 6px 7px);opacity:.55}
+.ln.r .tx{background:var(--delBg);color:var(--delText)}
+.ln.r .bar{background:var(--delBar)}
+.delmark{position:absolute;left:calc(var(--gw,52px) + 13px);top:-5px;width:0;height:0;border-left:7px solid var(--delBar);border-top:5px solid transparent;border-bottom:5px solid transparent;z-index:3;cursor:pointer}
+.foldbox{display:inline-block;border:1px solid var(--foldLine);background:var(--fold);border-radius:3px;padding:0 6px;color:var(--muted);cursor:pointer;line-height:16px}
+.foldbox:hover{color:var(--text)}
+.hcopy{position:absolute;right:10px;top:1px;z-index:4;display:none;border:1px solid var(--line2);background:var(--panel);border-radius:4px;font:600 11px/1 var(--ui);padding:3px 7px;cursor:pointer;box-shadow:var(--shadow)}
+.ln.hunkhead.hov .hcopy,.ln.hunkhead .hcopy:focus,.ln.hunkhead .hcopy.copied,.ln.hunkhead .hcopy.copyfail{display:block}
+.hcopy svg{width:11px;height:11px;vertical-align:-1px;margin-right:4px}
+.k{color:var(--kw)}.s{color:var(--str)}.c{color:var(--com);font-style:italic}.an{color:var(--ann)}.nu{color:var(--num)}.dc{color:var(--decl);font-weight:700}.xt{color:var(--kw)}.xa{color:var(--ann)}
+
+/* empty */
+.empty{display:grid;place-items:center;height:100%;color:var(--muted);text-align:center;padding:30px}
+.empty h2{color:var(--text);margin:0 0 6px;font-size:18px}
+
+/* bottom */
+.bottom{display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--panel);border-top:1px solid var(--line)}
+.bbody{flex:1;overflow:auto;min-height:0}
+.doc{padding:12px 16px 24px;max-width:980px}
+.doc h3{margin:2px 0 8px;font-size:15px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.doc h4{margin:14px 0 6px;font-size:13px}
+.doc p{margin:6px 0}
+.doc ul,.doc ol{margin:6px 0;padding-left:22px}
+.doc li{margin:3px 0}
+.doc code{font:12px var(--mono);background:var(--chrome2);border:1px solid var(--line2);border-radius:3px;padding:0 4px}
+.doc .path{display:block;font:12px var(--mono);background:var(--chrome2);border:1px solid var(--line2);border-radius:4px;padding:5px 8px;margin:6px 0;overflow-wrap:anywhere}
+.note{border:1px solid var(--line2);border-radius:5px;padding:8px 10px;margin:8px 0;background:var(--chrome2)}
+.note.warn{border-color:var(--modBar);background:var(--modBg)}
+.note.ok{border-color:var(--addBar);background:var(--addBg)}
+.note.bad{border-color:var(--delBar);background:var(--delBg)}
+.flink{color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.tests{width:100%;border-collapse:collapse;margin:8px 0;font-size:12.5px}
+.tests th,.tests td{border:1px solid var(--line2);padding:6px 8px;text-align:left;vertical-align:top}
+.tests th{background:var(--chrome2)}
+.tests td.st{white-space:nowrap;font-weight:700}
+.st.yes{color:var(--addText)}.st.part{color:var(--modText)}.st.no{color:var(--delText)}
+.outtabs{display:flex;gap:0;border-bottom:1px solid var(--line2);background:var(--chrome2);overflow-x:auto}
+.outtabs button{border:none;border-right:1px solid var(--line2);background:none;padding:4px 10px;cursor:pointer;font-size:12px;white-space:nowrap}
+.outtabs button.on{background:var(--out);font-weight:600;box-shadow:inset 0 -2px 0 var(--accent)}
+.outbody{display:flex;gap:0;min-height:0}
+.outside{display:flex;flex-direction:column;gap:2px;padding:6px 4px;border-right:1px solid var(--line2);background:var(--chrome2)}
+.console{flex:1;margin:0;padding:8px 12px;font:12.5px/1.5 var(--mono);background:var(--out);color:var(--outText);white-space:pre-wrap;min-height:120px}
+.console .ok{color:var(--outOk)}.console .err{color:var(--outErr)}.console .info{color:var(--outInfo)}.console .dim{color:var(--muted)}
+.console .cmt{color:var(--muted);font-style:italic}
+
+/* status bar */
+.statusbar{display:flex;gap:14px;align-items:center;background:var(--chrome);border-top:1px solid var(--line);padding:2px 10px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden}
+.statusbar .grow{flex:1}
+.statusbar b{color:var(--text);font-weight:600}
+
+/* popup + toast */
+.pop{position:fixed;z-index:50;background:var(--pop);border:1px solid var(--line2);border-radius:6px;box-shadow:var(--shadow);max-width:min(620px,92vw);font-size:12px}
+.pop .ph{padding:6px 10px;border-bottom:1px solid var(--line2);font-weight:600;display:flex;justify-content:space-between;gap:12px}
+.pop pre{margin:0;padding:8px 10px;font:12.5px/1.5 var(--mono);white-space:pre;overflow:auto;max-height:260px}
+.pop .ph button{border:none;background:none;cursor:pointer;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:38px;transform:translateX(-50%);background:var(--pop);border:1px solid var(--line2);box-shadow:var(--shadow);border-radius:6px;padding:7px 14px;z-index:60;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.on{opacity:1}
+
+.mobtoggle{display:none}
+@media (max-width:860px){
+  body{overflow:auto}
+  .ide{height:auto;min-height:100vh;grid-template-rows:auto auto auto auto auto}
+  .menubar{display:none}
+  .titlebar .win{display:none}
+  .legend{margin-left:0;width:100%}
+  .main{grid-template-columns:minmax(0,1fr)}
+  .splitter,.hsplit{display:none}
+  .left{display:none;grid-template-rows:auto auto;border-right:none;border-bottom:1px solid var(--line)}
+  .left.open{display:grid}
+  .left .pbody{max-height:46vh}
+  .mobtoggle{display:inline-flex}
+  .center{grid-template-rows:auto auto}
+  .editor{height:62vh}
+  .bottom{min-height:40vh}
+}
+</style>
+</head>
+<body>
+<div class="ide" id="ide">
+  <div class="titlebar">
+    <svg class="logo" viewBox="0 0 16 16" aria-hidden="true"><rect x="1" y="1" width="14" height="14" rx="3" fill="#2675bf"/><path d="M4.5 11V5l7 6V5" stroke="#fff" stroke-width="1.6" fill="none" stroke-linejoin="round"/></svg>
+    <span class="ttl" id="wintitle">Central de Senhas · Serviço de Nomes — Grupo 5</span>
+    <span class="win" aria-hidden="true"><span>—</span><span>☐</span><span>✕</span></span>
+  </div>
+  <div class="menubar" aria-hidden="true"><span>File</span><span>Edit</span><span>View</span><span>Navigate</span><span>Source</span><span>Refactor</span><span>Run</span><span>Debug</span><span>Profile</span><span>Team</span><span>Tools</span><span>Window</span><span>Help</span></div>
+  <div class="toolbar">
+    <button class="tb mobtoggle" id="btnTree" title="Mostrar/ocultar projetos"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+    <button class="tb" title="Novo arquivo (decorativo)" disabled><svg viewBox="0 0 18 18"><path d="M4 2h7l3 3v11H4z" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M11 2v3h3" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M12 11h4M14 9v4" stroke="#3aa53a" stroke-width="1.6"/></svg></button>
+    <button class="tb" title="Abrir projeto (decorativo)" disabled><svg viewBox="0 0 18 18"><path d="M2 5h5l1.5 1.5H16V15H2z" fill="#e8b84a" stroke="#b78a22"/></svg></button>
+    <button class="tb" title="Salvar tudo (decorativo)" disabled><svg viewBox="0 0 18 18"><rect x="3" y="3" width="12" height="12" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.2"/><rect x="6" y="3" width="6" height="4" fill="currentColor" opacity=".5"/></svg></button>
+    <span class="sep"></span>
+    <button class="tb" id="btnBuild" title="Clean and Build: ver instruções"><svg viewBox="0 0 18 18"><path d="M3 15l6-6" stroke="#8a5a2b" stroke-width="2.2" stroke-linecap="round"/><path d="M8 4l3-2 5 5-2 3z" fill="#7a7a7a"/><path d="M2 3h3M2 6h2" stroke="#3aa53a" stroke-width="1.4"/></svg></button>
+    <button class="tb" id="btnRun" title="Run: ver a saída esperada"><svg viewBox="0 0 18 18"><path d="M5 3l10 6-10 6z" fill="#3aa53a"/></svg></button>
+    <button class="tb" id="btnTheme" title="Alternar tema claro/escuro"><svg viewBox="0 0 18 18"><circle cx="9" cy="9" r="6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 3a6 6 0 0 0 0 12z" fill="currentColor"/></svg></button>
+    <div class="legend" id="legend"></div>
+  </div>
+  <div class="main" id="main">
+    <aside class="left" id="left">
+      <div class="panel">
+        <div class="ptabs"><button class="ptab on">Projects</button><span class="grow"></span></div>
+        <div class="pbody"><ul class="tree" id="tree"></ul></div>
+      </div>
+      <div class="hsplit" id="navsplit"></div>
+      <div class="panel">
+        <div class="ptabs"><button class="ptab on" id="navTitle">Roteiro</button><span class="grow"></span></div>
+        <div class="pbody"><ol class="steps" id="steps"></ol></div>
+      </div>
+    </aside>
+    <div class="splitter" id="vsplit"></div>
+    <section class="center" id="center">
+      <div class="editor">
+        <div class="etabs" id="etabs" role="tablist"></div>
+        <div class="etool" id="etool"></div>
+        <div class="codewrap" id="codewrap"></div>
+      </div>
+      <div class="hsplit" id="botsplit"></div>
+      <div class="bottom">
+        <div class="ptabs" id="btabs" role="tablist"></div>
+        <div class="bbody" id="bbody"></div>
+      </div>
+    </section>
+  </div>
+  <div class="statusbar" id="status"></div>
+</div>
+<div class="toast" id="toast"></div>
+<script id="data" type="application/json">{"defaultVersion":"enunciado","versions":{"enunciado":{"intro":"\u003ch3>Serviço de Nomes\u003c/h3>\u003cp>Segue a ficha do \u003cb>Trabalho 5\u003c/b> da professora: mini-registro com \u003ccode>Registrar\u003c/code>/\u003ccode>Localizar\u003c/code>/\u003ccode>Remover\u003c/code>, a Central entra como \u003ccode>\"atendimento\"\u003c/code> ao subir e sai ao encerrar, \u003ccode>NOT_FOUND\u003c/code> para nome desconhecido e um teste com \u003ccode>forTarget\u003c/code> via DNS.\u003c/p>\n\u003cdiv class=\"note ok\">Compilado e testado ponta a ponta: as saídas da aba \u003cb>Output\u003c/b> são reais.\u003c/div>\u003cp>Siga o \u003cb>Roteiro\u003c/b> à esquerda ou clique nos arquivos coloridos.\u003c/p>","steps":[{"title":"atendimento.proto (servidor)","sub":"acrescentar ServicoNomes + mensagens","kind":"alterado","file":"s_proto"},{"title":"ServicoNomesImpl.java","sub":"Registrar, Localizar, Remover","kind":"novo","file":"s_nomes"},{"title":"ServidorNomes.java","sub":"main do registro (porta 50052)","kind":"novo","file":"s_srvnom"},{"title":"ServidorAtendimentoRPC.java","sub":"registra ao subir, sai no ENTER","kind":"alterado","file":"s_main"},{"title":"atendimento.proto (cliente)","sub":"igual ao do servidor","kind":"alterado","file":"c_proto"},{"title":"ClienteNomes.java","sub":"localizar(nome)","kind":"novo","file":"c_clin"},{"title":"TelaTotem.java","sub":"construtor + localizarCentral()","kind":"alterado","file":"c_tela"},{"title":"TesteNomes.java","sub":"testes 2, 3 e 4","kind":"novo","file":"c_teste"},{"title":"Clean and Build nos dois","sub":"gera as classes do .proto","kind":"run","html":"\u003ch3>\u003cspan class=\"tag run\">EXECUTAR\u003c/span>Clean and Build\u003c/h3>\n\u003col>\u003cli>Botão direito em \u003cb>ServidorAtendimentoRPC\u003c/b> › \u003cb>Clean and Build\u003c/b>. Espere \u003ccode>BUILD SUCCESS\u003c/code>.\u003c/li>\n\u003cli>Faça o mesmo em \u003cb>ClienteAtendimentoRPC\u003c/b>.\u003c/li>\n\u003cli>Em \u003cb>Generated Sources (protobuf)\u003c/b> devem aparecer as classes novas: \u003ccode>ServicoNomesGrpc\u003c/code>, \u003ccode>Registro\u003c/code>, \u003ccode>Nome\u003c/code>, \u003ccode>Endereco\u003c/code>, \u003ccode>Vazio\u003c/code>.\u003c/li>\u003c/ol>\n\u003cdiv class=\"note\">Se as classes não aparecerem: \u003cb>Clean and Build\u003c/b> de novo. Persistiu? Apague a pasta \u003ccode>target\u003c/code> (aba Files) e repita.\u003c/div>"},{"title":"Rodar e testar","sub":"nomes → Central → totens → testes","kind":"run","html":"\u003ch3>\u003cspan class=\"tag run\">EXECUTAR\u003c/span>Rodar e testar\u003c/h3>\u003col>\n\u003cli>\u003cspan class=\"flink\" data-open=\"s_srvnom\">ServidorNomes.java\u003c/span> › botão direito › \u003cb>Run File\u003c/b> (Shift+F6). Espere \u003ccode>Serviço de Nomes no ar (porta 50052).\u003c/code>\u003c/li>\n\u003cli>Projeto \u003cb>ServidorAtendimentoRPC\u003c/b> › \u003cb>Run\u003c/b> (F6). Na Central: \u003ccode>Registrada como \"atendimento\"…\u003c/code>; no ServidorNomes: \u003ccode>Registrado: atendimento -&gt; localhost:50051\u003c/code>.\u003c/li>\n\u003cli>\u003cspan class=\"flink\" data-open=\"c_tela\">TelaTotem.java\u003c/span> › \u003cb>Run File\u003c/b> \u003cb>três vezes\u003c/b>, um por totem (Biblioteca, Central de Relacionamento, Financeiro). Cada Run abre um totem novo. O rodapé mostra \u003ccode>Central \"atendimento\": localhost:50051\u003c/code>. Peça senhas: a numeração é uma fila só (\u003cb>teste 1\u003c/b>).\u003c/li>\n\u003cli>\u003cspan class=\"flink\" data-open=\"c_teste\">TesteNomes.java\u003c/span> › \u003cb>Run File\u003c/b>: \u003ccode>financeiro → NOT_FOUND\u003c/code> (\u003cb>teste 2\u003c/b>) e \u003ccode>forTarget → senha\u003c/code> (\u003cb>teste 4\u003c/b>).\u003c/li>\n\u003cli>Clique no Output da Central e aperte \u003cb>ENTER\u003c/b>: ela sai do registro (\u003ccode>Removido: atendimento\u003c/code>) e desliga.\u003c/li>\n\u003cli>Rode o \u003cb>TesteNomes\u003c/b> de novo: \u003ccode>atendimento → NOT_FOUND\u003c/code> (\u003cb>teste 3\u003c/b>).\u003c/li>\n\u003cli>\u003ci>Extra:\u003c/i> suba a Central de novo e derrube no \u003cb>Stop\u003c/b> (quadrado vermelho). O registro continua apontando para ela, e o TesteNomes recebe o endereço mas a conexão dá \u003ccode>UNAVAILABLE\u003c/code>. É o \"por que quem cai precisa sair do registro\".\u003c/li>\u003c/ol>"}],"outputs":[{"tab":"ServidorNomes (run-single)","lines":["# (podem aparecer linhas WARNING sobre sun.misc.Unsafe: vêm do Netty no JDK novo, pode ignorar)","Serviço de Nomes no ar (porta 50052).","Registrado: atendimento -> localhost:50051","Localizado: atendimento -> localhost:50051","Localizado: atendimento -> localhost:50051","Localizado: atendimento -> localhost:50051","Localizado: atendimento -> localhost:50051","Localizar financeiro: NOT_FOUND","Removido: atendimento","Localizar atendimento: NOT_FOUND","Localizar financeiro: NOT_FOUND"]},{"tab":"ServidorAtendimentoRPC (run)","lines":["# (podem aparecer linhas WARNING sobre sun.misc.Unsafe: vêm do Netty no JDK novo, pode ignorar)","Central de Senhas no ar (porta 50051).","Registrada como \"atendimento\" no Serviço de Nomes.","Pressione ENTER para encerrar a Central.","Senha N-001 para Ana no totem Biblioteca","Senha P-002 para Bruno no totem Central de Relacionamento","Senha N-003 para Carla no totem Financeiro","Senha N-004 para Teste DNS no totem TesteNomes","# ← aqui alguém clicou no Output e apertou ENTER","Removida do Serviço de Nomes. Encerrando..."]},{"tab":"TesteNomes · Central no ar","lines":["Localizar \"atendimento\" -> localhost:50051","Localizar \"financeiro\" -> NOT_FOUND","forTarget dns:///localhost:50051 -> senha N-004"]},{"tab":"TesteNomes · depois do ENTER","lines":["Localizar \"atendimento\" -> NOT_FOUND","Localizar \"financeiro\" -> NOT_FOUND","forTarget dns:///localhost:50051 -> UNAVAILABLE"]},{"tab":"TesteNomes · Central caiu (Stop)","lines":["# Central derrubada no botão Stop, sem ENTER: o registro ficou com um endereço morto","Localizar \"atendimento\" -> localhost:50051","Localizar \"financeiro\" -> NOT_FOUND","forTarget dns:///localhost:50051 -> UNAVAILABLE"]}]}},"files":{"s_proto":{"name":"atendimento.proto","full":"ServidorAtendimentoRPC/src/main/proto/atendimento.proto","path":"src/main/proto/atendimento.proto","proj":"ServidorAtendimentoRPC","projShort":"servidor","lang":"proto","form":false,"text":{"orig":"\nsyntax = \"proto3\";\npackage atendimento;\noption java_package =\n\"com.mycompany.atendimentorpc\";\noption java_multiple_files = true;\n\nservice AtendimentoService {\n    rpc PegarSenha (PedidoSenha)\n    returns (Senha);\n}\n\nenum TipoAtendimento {\n    NORMAL = 0;\n    PRIORITARIO = 1;\n}\n\nmessage PedidoSenha {\n    string nome = 1;\n    TipoAtendimento tipo = 2;\n    string local = 3;\n}\nmessage Senha {\n    int32 numero = 1;\n    string codigo = 2;\n    string mensagem = 3;\n}\n","enunciado":"\nsyntax = \"proto3\";\npackage atendimento;\noption java_package =\n\"com.mycompany.atendimentorpc\";\noption java_multiple_files = true;\n\nservice AtendimentoService {\n    rpc PegarSenha (PedidoSenha)\n    returns (Senha);\n}\n\n// Serviço de Nomes: guarda \"nome -> endereço\"\nservice ServicoNomes {\n    rpc Registrar (Registro) returns (Vazio);  // a Central entra ao subir\n    rpc Localizar (Nome) returns (Endereco);   // o totem pergunta antes de conectar\n    rpc Remover (Nome) returns (Vazio);        // a Central sai ao encerrar\n}\n\nenum TipoAtendimento {\n    NORMAL = 0;\n    PRIORITARIO = 1;\n}\n\nmessage PedidoSenha {\n    string nome = 1;\n    TipoAtendimento tipo = 2;\n    string local = 3;\n}\nmessage Senha {\n    int32 numero = 1;\n    string codigo = 2;\n    string mensagem = 3;\n}\n\n// Mensagens do Serviço de Nomes\nmessage Registro {\n    string nome = 1;\n    string host = 2;\n    int32 porta = 3;\n}\nmessage Nome {\n    string nome = 1;\n}\nmessage Endereco {\n    string host = 1;\n    int32 porta = 2;\n}\nmessage Vazio {}\n"},"instr":{"enunciado":"\n\u003cp>\u003cb>O que fazer:\u003c/b> abra o arquivo (aba \u003cb>Projects\u003c/b> › Other Sources › src/main/proto) e \u003cb>acrescente\u003c/b> os dois blocos verdes: o \u003ccode>service ServicoNomes\u003c/code> logo depois do \u003ccode>AtendimentoService\u003c/code>, e as mensagens no fim. Use \u003cb>Copiar bloco\u003c/b> (aparece ao passar o mouse sobre o bloco verde) ou \u003cb>Copiar arquivo inteiro\u003c/b>.\u003c/p>\n\u003ch4>O que explicar\u003c/h4>\u003cul>\n\u003cli>São os 3 RPCs pedidos no Trabalho 5: \u003ccode>Registrar\u003c/code> (a Central entra ao subir), \u003ccode>Localizar\u003c/code> (o totem pergunta antes de conectar) e \u003ccode>Remover\u003c/code> (a Central sai ao encerrar).\u003c/li>\n\u003cli>\u003ccode>Endereco\u003c/code> é o que volta: host e porta. \u003ccode>Vazio\u003c/code> é uma resposta sem campos.\u003c/li>\n\u003cli>Não mexemos nos números dos campos que já existiam: as mensagens antigas continuam iguais.\u003c/li>\u003c/ul>\n\u003cdiv class=\"note warn\">O \u003ccode>.proto\u003c/code> precisa ficar \u003cb>idêntico\u003c/b> nos dois projetos. Não edite nada dentro de \u003ccode>target\u003c/code>.\u003c/div>"}},"s_impl":{"name":"AtendimentoServiceImpl.java","full":"ServidorAtendimentoRPC/src/main/java/com/mycompany/servidoratendimentorpc/AtendimentoServiceImpl.java","path":"src/main/java/com/mycompany/servidoratendimentorpc/AtendimentoServiceImpl.java","proj":"ServidorAtendimentoRPC","projShort":"servidor","lang":"java","form":false,"text":{"orig":"package com.mycompany.servidoratendimentorpc;\n\nimport com.mycompany.atendimentorpc.AtendimentoServiceGrpc;\nimport com.mycompany.atendimentorpc.PedidoSenha;\nimport com.mycompany.atendimentorpc.Senha;\nimport com.mycompany.atendimentorpc.TipoAtendimento;\nimport io.grpc.stub.StreamObserver;\n\npublic class AtendimentoServiceImpl\n        extends AtendimentoServiceGrpc.AtendimentoServiceImplBase {\n\n    // Estado compartilhado: todos os totens usam o mesmo contador\n    private int proximoNumero = 1;\n\n    // synchronized: dois totens nunca recebem o mesmo número\n    private synchronized int gerarNumero() {\n        return proximoNumero++;\n    }\n\n    @Override\n    public void pegarSenha(PedidoSenha req, StreamObserver\u003cSenha> observador) {\n        int numero = gerarNumero();\n        String prefixo = req.getTipo() == TipoAtendimento.PRIORITARIO\n                ? \"P\" : \"N\";\n        String codigo = String.format(\"%s-%03d\", prefixo, numero);\n        String mensagem = req.getNome() + \", sua senha é \" + codigo\n                + \" (totem: \" + req.getLocal() + \")\";\n        System.out.println(\"Senha \" + codigo + \" para \" + req.getNome()\n                + \" no totem \" + req.getLocal());\n        Senha resposta = Senha.newBuilder()\n                .setNumero(numero)\n                .setCodigo(codigo)\n                .setMensagem(mensagem)\n                .build();\n        observador.onNext(resposta); // envia a resposta ao totem\n        observador.onCompleted();    // encerra a chamada\n    }\n}\n","enunciado":"package com.mycompany.servidoratendimentorpc;\n\nimport com.mycompany.atendimentorpc.AtendimentoServiceGrpc;\nimport com.mycompany.atendimentorpc.PedidoSenha;\nimport com.mycompany.atendimentorpc.Senha;\nimport com.mycompany.atendimentorpc.TipoAtendimento;\nimport io.grpc.stub.StreamObserver;\n\npublic class AtendimentoServiceImpl\n        extends AtendimentoServiceGrpc.AtendimentoServiceImplBase {\n\n    // Estado compartilhado: todos os totens usam o mesmo contador\n    private int proximoNumero = 1;\n\n    // synchronized: dois totens nunca recebem o mesmo número\n    private synchronized int gerarNumero() {\n        return proximoNumero++;\n    }\n\n    @Override\n    public void pegarSenha(PedidoSenha req, StreamObserver\u003cSenha> observador) {\n        int numero = gerarNumero();\n        String prefixo = req.getTipo() == TipoAtendimento.PRIORITARIO\n                ? \"P\" : \"N\";\n        String codigo = String.format(\"%s-%03d\", prefixo, numero);\n        String mensagem = req.getNome() + \", sua senha é \" + codigo\n                + \" (totem: \" + req.getLocal() + \")\";\n        System.out.println(\"Senha \" + codigo + \" para \" + req.getNome()\n                + \" no totem \" + req.getLocal());\n        Senha resposta = Senha.newBuilder()\n                .setNumero(numero)\n                .setCodigo(codigo)\n                .setMensagem(mensagem)\n                .build();\n        observador.onNext(resposta); // envia a resposta ao totem\n        observador.onCompleted();    // encerra a chamada\n    }\n}\n"},"instr":{}},"s_nomes":{"name":"ServicoNomesImpl.java","full":"ServidorAtendimentoRPC/src/main/java/com/mycompany/servidoratendimentorpc/ServicoNomesImpl.java","path":"src/main/java/com/mycompany/servidoratendimentorpc/ServicoNomesImpl.java","proj":"ServidorAtendimentoRPC","projShort":"servidor","lang":"java","form":false,"text":{"orig":null,"enunciado":"package com.mycompany.servidoratendimentorpc;\n\nimport com.mycompany.atendimentorpc.Endereco;\nimport com.mycompany.atendimentorpc.Nome;\nimport com.mycompany.atendimentorpc.Registro;\nimport com.mycompany.atendimentorpc.ServicoNomesGrpc;\nimport com.mycompany.atendimentorpc.Vazio;\nimport io.grpc.Status;\nimport io.grpc.stub.StreamObserver;\nimport java.util.Map;\nimport java.util.concurrent.ConcurrentHashMap;\n\npublic class ServicoNomesImpl\n        extends ServicoNomesGrpc.ServicoNomesImplBase {\n\n    // O registro: nome -> endereço, compartilhado por todas as chamadas\n    // ConcurrentHashMap: várias chamadas podem mexer no mapa ao mesmo tempo\n    private final Map\u003cString, Endereco> registro = new ConcurrentHashMap\u003c>();\n\n    @Override\n    public void registrar(Registro req, StreamObserver\u003cVazio> observador) {\n        Endereco endereco = Endereco.newBuilder()\n                .setHost(req.getHost())\n                .setPorta(req.getPorta())\n                .build();\n        registro.put(req.getNome(), endereco);\n        System.out.println(\"Registrado: \" + req.getNome() + \" -> \"\n                + req.getHost() + \":\" + req.getPorta());\n        observador.onNext(Vazio.getDefaultInstance());\n        observador.onCompleted();\n    }\n\n    @Override\n    public void localizar(Nome req, StreamObserver\u003cEndereco> observador) {\n        Endereco endereco = registro.get(req.getNome());\n        if (endereco == null) {\n            // Ninguém registrou esse nome: a chamada termina com NOT_FOUND\n            System.out.println(\"Localizar \" + req.getNome() + \": NOT_FOUND\");\n            observador.onError(Status.NOT_FOUND\n                    .withDescription(\"Serviço não registrado: \" + req.getNome())\n                    .asRuntimeException());\n            return;\n        }\n        System.out.println(\"Localizado: \" + req.getNome() + \" -> \"\n                + endereco.getHost() + \":\" + endereco.getPorta());\n        observador.onNext(endereco);  // devolve host e porta ao totem\n        observador.onCompleted();\n    }\n\n    @Override\n    public void remover(Nome req, StreamObserver\u003cVazio> observador) {\n        registro.remove(req.getNome());\n        System.out.println(\"Removido: \" + req.getNome());\n        observador.onNext(Vazio.getDefaultInstance());\n        observador.onCompleted();\n    }\n}\n"},"instr":{"enunciado":"\u003cp>\u003cb>Como criar:\u003c/b> botão direito no pacote \u003ccode>com.mycompany.servidoratendimentorpc\u003c/code> › \u003cb>New › Java Class…\u003c/b> › digite o nome (sem \u003ccode>.java\u003c/code>) › \u003cb>Finish\u003c/b>. Apague o que o NetBeans gerou e cole o arquivo inteiro (botão \u003cb>Copiar arquivo\u003c/b>).\u003c/p>\n\u003ch4>O que explicar\u003c/h4>\u003cul>\n\u003cli>\u003ccode>registro\u003c/code>: o mapa nome → \u003ccode>Endereco\u003c/code>. \u003ccode>ConcurrentHashMap\u003c/code> porque várias chamadas chegam ao mesmo tempo, em threads diferentes.\u003c/li>\n\u003cli>\u003ccode>localizar\u003c/code>: se o nome não está no mapa, termina a chamada com \u003ccode>Status.NOT_FOUND\u003c/code> via \u003ccode>onError\u003c/code>. É um código oficial do gRPC, e o totem recebe \u003ccode>StatusRuntimeException\u003c/code> com \u003ccode>NOT_FOUND\u003c/code>.\u003c/li>\n\u003cli>\u003ccode>remover\u003c/code>: tira o nome do mapa. É o que faz \"quem sai, sai do registro\".\u003c/li>\u003c/ul>"}},"s_main":{"name":"ServidorAtendimentoRPC.java","full":"ServidorAtendimentoRPC/src/main/java/com/mycompany/servidoratendimentorpc/ServidorAtendimentoRPC.java","path":"src/main/java/com/mycompany/servidoratendimentorpc/ServidorAtendimentoRPC.java","proj":"ServidorAtendimentoRPC","projShort":"servidor","lang":"java","form":false,"text":{"orig":"package com.mycompany.servidoratendimentorpc;\n\nimport io.grpc.Server;\nimport io.grpc.ServerBuilder;\n\npublic class ServidorAtendimentoRPC {\n\n    public static void main(String[] args) throws Exception {\n        Server servidor = ServerBuilder.forPort(50051)\n                .addService(new AtendimentoServiceImpl())\n                .build()\n                .start();\n        System.out.println(\"Central de Senhas no ar (porta 50051).\");\n        servidor.awaitTermination();\n    }\n}\n","enunciado":"package com.mycompany.servidoratendimentorpc;\n\nimport com.mycompany.atendimentorpc.Nome;\nimport com.mycompany.atendimentorpc.Registro;\nimport com.mycompany.atendimentorpc.ServicoNomesGrpc;\nimport io.grpc.ManagedChannel;\nimport io.grpc.ManagedChannelBuilder;\nimport io.grpc.Server;\nimport io.grpc.ServerBuilder;\nimport java.util.Scanner;\n\npublic class ServidorAtendimentoRPC {\n\n    public static void main(String[] args) throws Exception {\n        Server servidor = ServerBuilder.forPort(50051)\n                .addService(new AtendimentoServiceImpl())\n                .build()\n                .start();\n        System.out.println(\"Central de Senhas no ar (porta 50051).\");\n\n        // Ao subir: a Central se registra no Serviço de Nomes como \"atendimento\"\n        ManagedChannel canalNomes = ManagedChannelBuilder\n                .forAddress(\"localhost\", 50052)\n                .usePlaintext()   // sem TLS: só no laboratório\n                .build();\n        ServicoNomesGrpc.ServicoNomesBlockingStub nomes =\n                ServicoNomesGrpc.newBlockingStub(canalNomes);\n        nomes.registrar(Registro.newBuilder()\n                .setNome(\"atendimento\")\n                .setHost(\"localhost\")\n                .setPorta(50051)\n                .build());\n        System.out.println(\"Registrada como \\\"atendimento\\\" no Serviço de Nomes.\");\n\n        // Ao encerrar: sai do registro, para nenhum totem procurar uma Central desligada\n        System.out.println(\"Pressione ENTER para encerrar a Central.\");\n        new Scanner(System.in).nextLine();\n        nomes.remover(Nome.newBuilder().setNome(\"atendimento\").build());\n        System.out.println(\"Removida do Serviço de Nomes. Encerrando...\");\n        canalNomes.shutdown();\n        servidor.shutdown();\n        servidor.awaitTermination();\n    }\n}\n"},"instr":{"enunciado":"\n\u003cp>\u003cb>O que fazer:\u003c/b> acrescente os imports e os blocos verdes (ou \u003cb>Copiar arquivo inteiro\u003c/b>: este arquivo não tem código gerado, então pode substituir tudo).\u003c/p>\n\u003ch4>O que explicar\u003c/h4>\u003cul>\n\u003cli>\u003cb>Ao subir:\u003c/b> depois de \u003ccode>start()\u003c/code>, a Central chama \u003ccode>registrar\u003c/code> no Serviço de Nomes com o nome \u003ccode>\"atendimento\"\u003c/code> → \u003ccode>localhost:50051\u003c/code>.\u003c/li>\n\u003cli>\u003cb>Ao encerrar:\u003c/b> o \u003ccode>Scanner\u003c/code> espera um ENTER no Output. Aí a Central chama \u003ccode>remover\u003c/code>, fecha o canal e desliga o servidor.\u003c/li>\n\u003cli>Usamos ENTER (e não o botão vermelho de Stop) porque o Stop do NetBeans mata o processo na hora, sem dar chance de sair do registro. Isso vira o teste extra: \"e se cair sem avisar?\".\u003c/li>\u003c/ul>\n\u003cdiv class=\"note warn\">Rode o \u003cspan class=\"flink\" data-open=\"s_srvnom\">ServidorNomes.java\u003c/span> \u003cb>antes\u003c/b>. Sem ele, a Central sobe mas falha ao registrar (\u003ccode>UNAVAILABLE\u003c/code>) e encerra.\u003c/div>"}},"s_srvnom":{"name":"ServidorNomes.java","full":"ServidorAtendimentoRPC/src/main/java/com/mycompany/servidoratendimentorpc/ServidorNomes.java","path":"src/main/java/com/mycompany/servidoratendimentorpc/ServidorNomes.java","proj":"ServidorAtendimentoRPC","projShort":"servidor","lang":"java","form":false,"text":{"orig":null,"enunciado":"package com.mycompany.servidoratendimentorpc;\n\nimport io.grpc.Server;\nimport io.grpc.ServerBuilder;\n\npublic class ServidorNomes {\n\n    // Roda separado da Central: botão direito no arquivo > Run File (Shift+F6)\n    public static void main(String[] args) throws Exception {\n        Server servidor = ServerBuilder.forPort(50052)\n                .addService(new ServicoNomesImpl())\n                .build()\n                .start();\n        System.out.println(\"Serviço de Nomes no ar (porta 50052).\");\n        servidor.awaitTermination();\n    }\n}\n"},"instr":{"enunciado":"\u003cp>\u003cb>Como criar:\u003c/b> botão direito no pacote \u003ccode>com.mycompany.servidoratendimentorpc\u003c/code> › \u003cb>New › Java Class…\u003c/b> › digite o nome (sem \u003ccode>.java\u003c/code>) › \u003cb>Finish\u003c/b>. Apague o que o NetBeans gerou e cole o arquivo inteiro (botão \u003cb>Copiar arquivo\u003c/b>).\u003c/p>\n\u003cp>É o \u003ccode>main\u003c/code> do Serviço de Nomes, igual ao da Central, só que na porta \u003cb>50052\u003c/b>. Roda \u003cb>separado\u003c/b>: botão direito no arquivo › \u003cb>Run File\u003c/b> (Shift+F6).\u003c/p>\n\u003ch4>Por que separado?\u003c/h4>\u003cp>Assim a Central pode cair ou desligar sem levar o registro junto. É o que permite mostrar o teste 3 (sair do registro) e o \"e se a Central cair sem avisar?\".\u003c/p>"}},"s_pom":{"name":"pom.xml","full":"ServidorAtendimentoRPC/pom.xml","path":"pom.xml","proj":"ServidorAtendimentoRPC","projShort":"servidor","lang":"xml","form":false,"text":{"orig":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\u003cproject xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n    \u003cmodelVersion>4.0.0\u003c/modelVersion>\n    \u003cgroupId>com.mycompany\u003c/groupId>\n    \u003cartifactId>ServidorAtendimentoRPC\u003c/artifactId>\n    \u003cversion>1.0-SNAPSHOT\u003c/version>\n    \u003cpackaging>jar\u003c/packaging>\n    \u003cproperties>\n        \u003cproject.build.sourceEncoding>UTF-8\u003c/project.build.sourceEncoding>\n        \u003cmaven.compiler.release>25\u003c/maven.compiler.release>\n        \u003cexec.mainClass>com.mycompany.servidoratendimentorpc.ServidorAtendimentoRPC\u003c/exec.mainClass>\n        \u003cgrpc.version>1.75.0\u003c/grpc.version>\n        \u003cprotobuf.version>3.25.5\u003c/protobuf.version>        \n    \u003c/properties>\n    \u003cname>ServidorAtendimentoRPC\u003c/name>\n    \u003cdependencies>\n    \u003cdependency>\n      \u003cgroupId>io.grpc\u003c/groupId>\n      \u003cartifactId>grpc-netty-shaded\u003c/artifactId>\n      \u003cversion>${grpc.version}\u003c/version>\n    \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-protobuf\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-stub\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>javax.annotation\u003c/groupId>\n          \u003cartifactId>javax.annotation-api\u003c/artifactId>\n          \u003cversion>1.3.2\u003c/version>\n        \u003c/dependency>\n      \u003c/dependencies>    \n    \u003cbuild>\n      \u003cextensions>\n        \u003cextension>\n          \u003cgroupId>kr.motd.maven\u003c/groupId>\n          \u003cartifactId>os-maven-plugin\u003c/artifactId>\n          \u003cversion>1.7.1\u003c/version>\n        \u003c/extension>\n      \u003c/extensions>\n      \u003cplugins>\n        \u003cplugin>\n          \u003cgroupId>org.xolstice.maven.plugins\u003c/groupId>\n          \u003cartifactId>protobuf-maven-plugin\u003c/artifactId>\n          \u003cversion>0.6.1\u003c/version>\n          \u003cconfiguration>\n            \u003cprotocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}\u003c/protocArtifact>\n            \u003cpluginId>grpc-java\u003c/pluginId>\n            \u003cpluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}\u003c/pluginArtifact>\n          \u003c/configuration>\n          \u003cexecutions>\n            \u003cexecution>\n              \u003cgoals>\u003cgoal>compile\u003c/goal>\u003cgoal>compile-custom\u003c/goal>\u003c/goals>\n            \u003c/execution>\n          \u003c/executions>\n        \u003c/plugin>\n      \u003c/plugins>\n    \u003c/build>\n\u003c/project>","enunciado":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\u003cproject xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n    \u003cmodelVersion>4.0.0\u003c/modelVersion>\n    \u003cgroupId>com.mycompany\u003c/groupId>\n    \u003cartifactId>ServidorAtendimentoRPC\u003c/artifactId>\n    \u003cversion>1.0-SNAPSHOT\u003c/version>\n    \u003cpackaging>jar\u003c/packaging>\n    \u003cproperties>\n        \u003cproject.build.sourceEncoding>UTF-8\u003c/project.build.sourceEncoding>\n        \u003cmaven.compiler.release>25\u003c/maven.compiler.release>\n        \u003cexec.mainClass>com.mycompany.servidoratendimentorpc.ServidorAtendimentoRPC\u003c/exec.mainClass>\n        \u003cgrpc.version>1.75.0\u003c/grpc.version>\n        \u003cprotobuf.version>3.25.5\u003c/protobuf.version>        \n    \u003c/properties>\n    \u003cname>ServidorAtendimentoRPC\u003c/name>\n    \u003cdependencies>\n    \u003cdependency>\n      \u003cgroupId>io.grpc\u003c/groupId>\n      \u003cartifactId>grpc-netty-shaded\u003c/artifactId>\n      \u003cversion>${grpc.version}\u003c/version>\n    \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-protobuf\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-stub\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>javax.annotation\u003c/groupId>\n          \u003cartifactId>javax.annotation-api\u003c/artifactId>\n          \u003cversion>1.3.2\u003c/version>\n        \u003c/dependency>\n      \u003c/dependencies>    \n    \u003cbuild>\n      \u003cextensions>\n        \u003cextension>\n          \u003cgroupId>kr.motd.maven\u003c/groupId>\n          \u003cartifactId>os-maven-plugin\u003c/artifactId>\n          \u003cversion>1.7.1\u003c/version>\n        \u003c/extension>\n      \u003c/extensions>\n      \u003cplugins>\n        \u003cplugin>\n          \u003cgroupId>org.xolstice.maven.plugins\u003c/groupId>\n          \u003cartifactId>protobuf-maven-plugin\u003c/artifactId>\n          \u003cversion>0.6.1\u003c/version>\n          \u003cconfiguration>\n            \u003cprotocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}\u003c/protocArtifact>\n            \u003cpluginId>grpc-java\u003c/pluginId>\n            \u003cpluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}\u003c/pluginArtifact>\n          \u003c/configuration>\n          \u003cexecutions>\n            \u003cexecution>\n              \u003cgoals>\u003cgoal>compile\u003c/goal>\u003cgoal>compile-custom\u003c/goal>\u003c/goals>\n            \u003c/execution>\n          \u003c/executions>\n        \u003c/plugin>\n      \u003c/plugins>\n    \u003c/build>\n\u003c/project>"},"instr":{}},"c_proto":{"name":"atendimento.proto","full":"ClienteAtendimentoRPC/src/main/proto/atendimento.proto","path":"src/main/proto/atendimento.proto","proj":"ClienteAtendimentoRPC","projShort":"cliente","lang":"proto","form":false,"text":{"orig":"\nsyntax = \"proto3\";\npackage atendimento;\noption java_package =\n\"com.mycompany.atendimentorpc\";\noption java_multiple_files = true;\n\nservice AtendimentoService {\n    rpc PegarSenha (PedidoSenha)\n    returns (Senha);\n}\n\nenum TipoAtendimento {\n    NORMAL = 0;\n    PRIORITARIO = 1;\n}\n\nmessage PedidoSenha {\n    string nome = 1;\n    TipoAtendimento tipo = 2;\n    string local = 3;\n}\nmessage Senha {\n    int32 numero = 1;\n    string codigo = 2;\n    string mensagem = 3;\n}\n","enunciado":"\nsyntax = \"proto3\";\npackage atendimento;\noption java_package =\n\"com.mycompany.atendimentorpc\";\noption java_multiple_files = true;\n\nservice AtendimentoService {\n    rpc PegarSenha (PedidoSenha)\n    returns (Senha);\n}\n\n// Serviço de Nomes: guarda \"nome -> endereço\"\nservice ServicoNomes {\n    rpc Registrar (Registro) returns (Vazio);  // a Central entra ao subir\n    rpc Localizar (Nome) returns (Endereco);   // o totem pergunta antes de conectar\n    rpc Remover (Nome) returns (Vazio);        // a Central sai ao encerrar\n}\n\nenum TipoAtendimento {\n    NORMAL = 0;\n    PRIORITARIO = 1;\n}\n\nmessage PedidoSenha {\n    string nome = 1;\n    TipoAtendimento tipo = 2;\n    string local = 3;\n}\nmessage Senha {\n    int32 numero = 1;\n    string codigo = 2;\n    string mensagem = 3;\n}\n\n// Mensagens do Serviço de Nomes\nmessage Registro {\n    string nome = 1;\n    string host = 2;\n    int32 porta = 3;\n}\nmessage Nome {\n    string nome = 1;\n}\nmessage Endereco {\n    string host = 1;\n    int32 porta = 2;\n}\nmessage Vazio {}\n"},"instr":{"enunciado":"\n\u003cp>\u003cb>O que fazer:\u003c/b> deixe este arquivo \u003cb>igual\u003c/b> ao \u003cspan class=\"flink\" data-open=\"s_proto\">atendimento.proto do servidor\u003c/span> (mesmos blocos verdes). O jeito mais seguro: \u003cb>Copiar arquivo inteiro\u003c/b> e colar por cima.\u003c/p>"}},"c_clin":{"name":"ClienteNomes.java","full":"ClienteAtendimentoRPC/src/main/java/com/mycompany/atendimentorpc/ClienteNomes.java","path":"src/main/java/com/mycompany/atendimentorpc/ClienteNomes.java","proj":"ClienteAtendimentoRPC","projShort":"cliente","lang":"java","form":false,"text":{"orig":null,"enunciado":"package com.mycompany.atendimentorpc;\n\nimport io.grpc.ManagedChannel;\nimport io.grpc.ManagedChannelBuilder;\nimport java.util.concurrent.TimeUnit;\n\npublic class ClienteNomes {\n\n    // O único endereço fixo que o totem conhece: o do Serviço de Nomes\n    private static final String HOST_NOMES = \"localhost\";\n    private static final int PORTA_NOMES = 50052;\n\n    // Pergunta ao Serviço de Nomes onde está o serviço com esse nome.\n    // Nome não registrado: a chamada falha com o código NOT_FOUND.\n    public static Endereco localizar(String nome) {\n        ManagedChannel canal = ManagedChannelBuilder\n                .forAddress(HOST_NOMES, PORTA_NOMES)\n                .usePlaintext()   // sem TLS: só no laboratório\n                .build();\n        try {\n            ServicoNomesGrpc.ServicoNomesBlockingStub stub =\n                    ServicoNomesGrpc.newBlockingStub(canal);\n            return stub.withDeadlineAfter(5, TimeUnit.SECONDS)\n                    .localizar(Nome.newBuilder().setNome(nome).build());\n        } finally {\n            canal.shutdown();   // a consulta acabou: fecha a conexão\n        }\n    }\n}\n"},"instr":{"enunciado":"\u003cp>\u003cb>Como criar:\u003c/b> botão direito no pacote \u003ccode>com.mycompany.atendimentorpc\u003c/code> › \u003cb>New › Java Class…\u003c/b> › digite o nome (sem \u003ccode>.java\u003c/code>) › \u003cb>Finish\u003c/b>. Apague o que o NetBeans gerou e cole o arquivo inteiro (botão \u003cb>Copiar arquivo\u003c/b>).\u003c/p>\n\u003ch4>O que explicar\u003c/h4>\u003cul>\n\u003cli>O único endereço fixo que sobra no cliente é o do Serviço de Nomes (\u003ccode>localhost:50052\u003c/code>).\u003c/li>\n\u003cli>\u003ccode>localizar(nome)\u003c/code> abre um canal, pergunta, fecha o canal (\u003ccode>finally\u003c/code>) e devolve o \u003ccode>Endereco\u003c/code> gerado pelo \u003ccode>.proto\u003c/code>.\u003c/li>\n\u003cli>Prazo de 5 s (\u003ccode>withDeadlineAfter\u003c/code>), igual ao do \u003ccode>pegarSenha\u003c/code> da aula.\u003c/li>\u003c/ul>"}},"c_tela":{"name":"TelaTotem.java","full":"ClienteAtendimentoRPC/src/main/java/com/mycompany/atendimentorpc/TelaTotem.java","path":"src/main/java/com/mycompany/atendimentorpc/TelaTotem.java","proj":"ClienteAtendimentoRPC","projShort":"cliente","lang":"java","form":true,"text":{"orig":"\npackage com.mycompany.atendimentorpc;\n\nimport com.mycompany.atendimentorpc.AtendimentoServiceGrpc;\nimport com.mycompany.atendimentorpc.PedidoSenha;\nimport com.mycompany.atendimentorpc.Senha;\nimport com.mycompany.atendimentorpc.TipoAtendimento;\nimport io.grpc.ManagedChannel;\nimport io.grpc.ManagedChannelBuilder;\nimport io.grpc.StatusRuntimeException;\nimport java.util.concurrent.TimeUnit;\nimport javax.swing.JOptionPane;\n\n\npublic class TelaTotem extends javax.swing.JFrame {    \n    private final ManagedChannel canal;\n    private final AtendimentoServiceGrpc.AtendimentoServiceBlockingStub stub;\n    \n    public TelaTotem() {\n        initComponents();\n        canal = ManagedChannelBuilder\n                .forAddress(\"localhost\", 50051)\n                .usePlaintext()   // sem TLS: só no laboratório\n                .build();\n        stub = AtendimentoServiceGrpc.newBlockingStub(canal);\n        Runtime.getRuntime().addShutdownHook(new Thread(canal::shutdown));        \n    }\n\n    /**\n     * This method is called from within the constructor to initialize the form.\n     * WARNING: Do NOT modify this code. The content of this method is always\n     * regenerated by the Form Editor.\n     */\n    @SuppressWarnings(\"unchecked\")\n    // \u003ceditor-fold defaultstate=\"collapsed\" desc=\"Generated Code\">//GEN-BEGIN:initComponents\n    private void initComponents() {\n\n        grupoTipo = new javax.swing.ButtonGroup();\n        painelFundo = new javax.swing.JPanel();\n        painelCabecalho = new javax.swing.JPanel();\n        lblMarca = new javax.swing.JLabel();\n        lblTitulo = new javax.swing.JLabel();\n        lblLocal = new javax.swing.JLabel();\n        cbxLocal = new javax.swing.JComboBox\u003c>();\n        lblNome = new javax.swing.JLabel();\n        tfNome = new javax.swing.JTextField();\n        lblTipo = new javax.swing.JLabel();\n        rbNormal = new javax.swing.JRadioButton();\n        rbPrioritario = new javax.swing.JRadioButton();\n        btnPegarSenha = new javax.swing.JButton();\n        painelSenha = new javax.swing.JPanel();\n        lblSuaSenha = new javax.swing.JLabel();\n        lbSenha = new javax.swing.JLabel();\n        lblMensagem = new javax.swing.JLabel();\n        lblStatus = new javax.swing.JLabel();\n\n        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);\n        setTitle(\"Central de Senhas - Totem\");\n        setResizable(false);\n\n        painelFundo.setBackground(new java.awt.Color(244, 246, 245));\n\n        painelCabecalho.setBackground(new java.awt.Color(18, 48, 47));\n\n        lblMarca.setFont(new java.awt.Font(\"Segoe UI\", 1, 13)); // NOI18N\n        lblMarca.setForeground(new java.awt.Color(233, 160, 108));\n        lblMarca.setText(\"CENTRAL DE SENHAS\");\n\n        lblTitulo.setFont(new java.awt.Font(\"Segoe UI\", 1, 24)); // NOI18N\n        lblTitulo.setForeground(new java.awt.Color(255, 255, 255));\n        lblTitulo.setText(\"Pegue sua senha\");\n\n        javax.swing.GroupLayout painelCabecalhoLayout = new javax.swing.GroupLayout(painelCabecalho);\n        painelCabecalho.setLayout(painelCabecalhoLayout);\n        painelCabecalhoLayout.setHorizontalGroup(\n            painelCabecalhoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelCabecalhoLayout.createSequentialGroup()\n                .addGap(24, 24, 24)\n                .addGroup(painelCabecalhoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n                    .addComponent(lblMarca)\n                    .addComponent(lblTitulo))\n                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))\n        );\n        painelCabecalhoLayout.setVerticalGroup(\n            painelCabecalhoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelCabecalhoLayout.createSequentialGroup()\n                .addGap(16, 16, 16)\n                .addComponent(lblMarca)\n                .addGap(4, 4, 4)\n                .addComponent(lblTitulo)\n                .addGap(16, 16, 16))\n        );\n\n        lblLocal.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblLocal.setForeground(new java.awt.Color(74, 90, 94));\n        lblLocal.setText(\"Local do totem\");\n\n        cbxLocal.setFont(new java.awt.Font(\"Segoe UI\", 0, 16)); // NOI18N\n        cbxLocal.setModel(new javax.swing.DefaultComboBoxModel\u003c>(new String[] { \"Biblioteca\", \"Central de Relacionamento\", \"Financeiro\" }));\n        cbxLocal.addActionListener(new java.awt.event.ActionListener() {\n            public void actionPerformed(java.awt.event.ActionEvent evt) {\n                cbxLocalActionPerformed(evt);\n            }\n        });\n\n        lblNome.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblNome.setForeground(new java.awt.Color(74, 90, 94));\n        lblNome.setText(\"Digite seu nome\");\n\n        lblTipo.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblTipo.setForeground(new java.awt.Color(74, 90, 94));\n        lblTipo.setText(\"Tipo de atendimento\");\n\n        rbNormal.setBackground(new java.awt.Color(244, 246, 245));\n        grupoTipo.add(rbNormal);\n        rbNormal.setFont(new java.awt.Font(\"Segoe UI\", 0, 16)); // NOI18N\n        rbNormal.setSelected(true);\n        rbNormal.setText(\"Normal\");\n\n        rbPrioritario.setBackground(new java.awt.Color(244, 246, 245));\n        grupoTipo.add(rbPrioritario);\n        rbPrioritario.setFont(new java.awt.Font(\"Segoe UI\", 0, 16)); // NOI18N\n        rbPrioritario.setText(\"Prioritário\");\n\n        btnPegarSenha.setBackground(new java.awt.Color(201, 86, 26));\n        btnPegarSenha.setFont(new java.awt.Font(\"Segoe UI\", 1, 18)); // NOI18N\n        btnPegarSenha.setForeground(new java.awt.Color(255, 255, 255));\n        btnPegarSenha.setText(\"PEGAR SENHA\");\n        btnPegarSenha.addActionListener(new java.awt.event.ActionListener() {\n            public void actionPerformed(java.awt.event.ActionEvent evt) {\n                btnPegarSenhaActionPerformed(evt);\n            }\n        });\n\n        painelSenha.setBackground(new java.awt.Color(251, 234, 223));\n\n        lblSuaSenha.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblSuaSenha.setForeground(new java.awt.Color(142, 58, 14));\n        lblSuaSenha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);\n        lblSuaSenha.setText(\"SUA SENHA\");\n\n        lbSenha.setFont(new java.awt.Font(\"Segoe UI\", 1, 46)); // NOI18N\n        lbSenha.setForeground(new java.awt.Color(18, 48, 47));\n        lbSenha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);\n        lbSenha.setText(\"---\");\n\n        lblMensagem.setFont(new java.awt.Font(\"Segoe UI\", 0, 13)); // NOI18N\n        lblMensagem.setForeground(new java.awt.Color(74, 90, 94));\n        lblMensagem.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);\n        lblMensagem.setText(\"Aguarde ser chamado no painel\");\n\n        javax.swing.GroupLayout painelSenhaLayout = new javax.swing.GroupLayout(painelSenha);\n        painelSenha.setLayout(painelSenhaLayout);\n        painelSenhaLayout.setHorizontalGroup(\n            painelSenhaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelSenhaLayout.createSequentialGroup()\n                .addGap(12, 12, 12)\n                .addGroup(painelSenhaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n                    .addComponent(lblSuaSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lbSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lblMensagem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))\n                .addGap(12, 12, 12))\n        );\n        painelSenhaLayout.setVerticalGroup(\n            painelSenhaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelSenhaLayout.createSequentialGroup()\n                .addGap(14, 14, 14)\n                .addComponent(lblSuaSenha)\n                .addGap(4, 4, 4)\n                .addComponent(lbSenha)\n                .addGap(4, 4, 4)\n                .addComponent(lblMensagem)\n                .addGap(14, 14, 14))\n        );\n\n        lblStatus.setFont(new java.awt.Font(\"Segoe UI\", 0, 13)); // NOI18N\n        lblStatus.setForeground(new java.awt.Color(13, 107, 112));\n        lblStatus.setText(\"Central: localhost:50051\");\n\n        javax.swing.GroupLayout painelFundoLayout = new javax.swing.GroupLayout(painelFundo);\n        painelFundo.setLayout(painelFundoLayout);\n        painelFundoLayout.setHorizontalGroup(\n            painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addComponent(painelCabecalho, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n            .addGroup(painelFundoLayout.createSequentialGroup()\n                .addGap(24, 24, 24)\n                .addGroup(painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n                    .addComponent(lblLocal)\n                    .addComponent(cbxLocal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lblNome)\n                    .addComponent(tfNome)\n                    .addComponent(lblTipo)\n                    .addGroup(painelFundoLayout.createSequentialGroup()\n                        .addComponent(rbNormal)\n                        .addGap(30, 30, 30)\n                        .addComponent(rbPrioritario))\n                    .addComponent(btnPegarSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)\n                    .addComponent(painelSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lblStatus))\n                .addGap(24, 24, 24))\n        );\n        painelFundoLayout.setVerticalGroup(\n            painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelFundoLayout.createSequentialGroup()\n                .addComponent(painelCabecalho, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(18, 18, 18)\n                .addComponent(lblLocal)\n                .addGap(6, 6, 6)\n                .addComponent(cbxLocal, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(14, 14, 14)\n                .addComponent(lblNome)\n                .addGap(6, 6, 6)\n                .addComponent(tfNome, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(14, 14, 14)\n                .addComponent(lblTipo)\n                .addGap(6, 6, 6)\n                .addGroup(painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)\n                    .addComponent(rbNormal)\n                    .addComponent(rbPrioritario))\n                .addGap(18, 18, 18)\n                .addComponent(btnPegarSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(18, 18, 18)\n                .addComponent(painelSenha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(14, 14, 14)\n                .addComponent(lblStatus)\n                .addGap(16, 16, 16))\n        );\n\n        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());\n        getContentPane().setLayout(layout);\n        layout.setHorizontalGroup(\n            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addComponent(painelFundo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n        );\n        layout.setVerticalGroup(\n            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addComponent(painelFundo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n        );\n\n        pack();\n        setLocationRelativeTo(null);\n    }// \u003c/editor-fold>//GEN-END:initComponents\n\n    private void btnPegarSenhaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPegarSenhaActionPerformed\n        String nome = tfNome.getText().trim();\n        if (nome.isEmpty()) {\n            JOptionPane.showMessageDialog(this, \"Digite seu nome.\");\n            return;\n        }\n        String local = (String) cbxLocal.getSelectedItem();\n        TipoAtendimento tipo = rbPrioritario.isSelected()\n                ? TipoAtendimento.PRIORITARIO : TipoAtendimento.NORMAL;\n        PedidoSenha pedido = PedidoSenha.newBuilder()\n                .setNome(nome).setTipo(tipo).setLocal(local).build();\n        try {\n            Senha senha = stub.withDeadlineAfter(5, TimeUnit.SECONDS)\n                    .pegarSenha(pedido);\n            lbSenha.setText(senha.getCodigo());\n            tfNome.setText(\"\");\n        } catch (StatusRuntimeException e) {\n            lbSenha.setText(\"---\");\n            JOptionPane.showMessageDialog(this,\n                    \"Falha na chamada: \" + e.getStatus().getCode());\n        }\n    }//GEN-LAST:event_btnPegarSenhaActionPerformed\n\n    private void cbxLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxLocalActionPerformed\n        // TODO add your handling code here:\n    }//GEN-LAST:event_cbxLocalActionPerformed\n\n    /**\n     * @param args the command line arguments\n     */\n    public static void main(String args[]) {\n        /* Set the Nimbus look and feel */\n        //\u003ceditor-fold defaultstate=\"collapsed\" desc=\" Look and feel setting code (optional) \">\n        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.\n         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html \n         */\n        try {\n            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {\n                if (\"Nimbus\".equals(info.getName())) {\n                    javax.swing.UIManager.setLookAndFeel(info.getClassName());\n                    break;\n                }\n            }\n        } catch (ClassNotFoundException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        } catch (InstantiationException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        } catch (IllegalAccessException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        } catch (javax.swing.UnsupportedLookAndFeelException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        }\n        //\u003c/editor-fold>\n\n        /* Create and display the form */\n        java.awt.EventQueue.invokeLater(new Runnable() {\n            public void run() {\n                new TelaTotem().setVisible(true);\n            }\n        });\n    }\n\n    // Variables declaration - do not modify//GEN-BEGIN:variables\n    private javax.swing.JButton btnPegarSenha;\n    private javax.swing.JComboBox\u003cString> cbxLocal;\n    private javax.swing.ButtonGroup grupoTipo;\n    private javax.swing.JLabel lbSenha;\n    private javax.swing.JLabel lblLocal;\n    private javax.swing.JLabel lblMarca;\n    private javax.swing.JLabel lblMensagem;\n    private javax.swing.JLabel lblNome;\n    private javax.swing.JLabel lblStatus;\n    private javax.swing.JLabel lblSuaSenha;\n    private javax.swing.JLabel lblTipo;\n    private javax.swing.JLabel lblTitulo;\n    private javax.swing.JPanel painelCabecalho;\n    private javax.swing.JPanel painelFundo;\n    private javax.swing.JPanel painelSenha;\n    private javax.swing.JRadioButton rbNormal;\n    private javax.swing.JRadioButton rbPrioritario;\n    private javax.swing.JTextField tfNome;\n    // End of variables declaration//GEN-END:variables\n}\n","enunciado":"\npackage com.mycompany.atendimentorpc;\n\nimport com.mycompany.atendimentorpc.AtendimentoServiceGrpc;\nimport com.mycompany.atendimentorpc.PedidoSenha;\nimport com.mycompany.atendimentorpc.Senha;\nimport com.mycompany.atendimentorpc.TipoAtendimento;\nimport io.grpc.ManagedChannel;\nimport io.grpc.ManagedChannelBuilder;\nimport io.grpc.StatusRuntimeException;\nimport java.util.concurrent.TimeUnit;\nimport javax.swing.JOptionPane;\n\n\npublic class TelaTotem extends javax.swing.JFrame {    \n    private final ManagedChannel canal;\n    private final AtendimentoServiceGrpc.AtendimentoServiceBlockingStub stub;\n    \n    public TelaTotem() {\n        initComponents();\n        Endereco central = localizarCentral();   // pergunta ao Serviço de Nomes\n        canal = ManagedChannelBuilder\n                .forAddress(central.getHost(), central.getPorta())\n                .usePlaintext()   // sem TLS: só no laboratório\n                .build();\n        stub = AtendimentoServiceGrpc.newBlockingStub(canal);\n        lblStatus.setText(\"Central \\\"atendimento\\\": \"\n                + central.getHost() + \":\" + central.getPorta());\n        Runtime.getRuntime().addShutdownHook(new Thread(canal::shutdown));\n    }\n\n    // Descobre a Central pelo nome \"atendimento\" antes de conectar\n    private Endereco localizarCentral() {\n        try {\n            return ClienteNomes.localizar(\"atendimento\");\n        } catch (StatusRuntimeException e) {\n            // NOT_FOUND: ninguém registrou o nome; UNAVAILABLE: Serviço de Nomes fora do ar\n            JOptionPane.showMessageDialog(this,\n                    \"Central não localizada: \" + e.getStatus().getCode());\n            System.exit(1);   // sem endereço, o totem não tem a quem pedir senha\n            throw e;          // nunca executa; só para o compilador\n        }\n    }\n\n    /**\n     * This method is called from within the constructor to initialize the form.\n     * WARNING: Do NOT modify this code. The content of this method is always\n     * regenerated by the Form Editor.\n     */\n    @SuppressWarnings(\"unchecked\")\n    // \u003ceditor-fold defaultstate=\"collapsed\" desc=\"Generated Code\">//GEN-BEGIN:initComponents\n    private void initComponents() {\n\n        grupoTipo = new javax.swing.ButtonGroup();\n        painelFundo = new javax.swing.JPanel();\n        painelCabecalho = new javax.swing.JPanel();\n        lblMarca = new javax.swing.JLabel();\n        lblTitulo = new javax.swing.JLabel();\n        lblLocal = new javax.swing.JLabel();\n        cbxLocal = new javax.swing.JComboBox\u003c>();\n        lblNome = new javax.swing.JLabel();\n        tfNome = new javax.swing.JTextField();\n        lblTipo = new javax.swing.JLabel();\n        rbNormal = new javax.swing.JRadioButton();\n        rbPrioritario = new javax.swing.JRadioButton();\n        btnPegarSenha = new javax.swing.JButton();\n        painelSenha = new javax.swing.JPanel();\n        lblSuaSenha = new javax.swing.JLabel();\n        lbSenha = new javax.swing.JLabel();\n        lblMensagem = new javax.swing.JLabel();\n        lblStatus = new javax.swing.JLabel();\n\n        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);\n        setTitle(\"Central de Senhas - Totem\");\n        setResizable(false);\n\n        painelFundo.setBackground(new java.awt.Color(244, 246, 245));\n\n        painelCabecalho.setBackground(new java.awt.Color(18, 48, 47));\n\n        lblMarca.setFont(new java.awt.Font(\"Segoe UI\", 1, 13)); // NOI18N\n        lblMarca.setForeground(new java.awt.Color(233, 160, 108));\n        lblMarca.setText(\"CENTRAL DE SENHAS\");\n\n        lblTitulo.setFont(new java.awt.Font(\"Segoe UI\", 1, 24)); // NOI18N\n        lblTitulo.setForeground(new java.awt.Color(255, 255, 255));\n        lblTitulo.setText(\"Pegue sua senha\");\n\n        javax.swing.GroupLayout painelCabecalhoLayout = new javax.swing.GroupLayout(painelCabecalho);\n        painelCabecalho.setLayout(painelCabecalhoLayout);\n        painelCabecalhoLayout.setHorizontalGroup(\n            painelCabecalhoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelCabecalhoLayout.createSequentialGroup()\n                .addGap(24, 24, 24)\n                .addGroup(painelCabecalhoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n                    .addComponent(lblMarca)\n                    .addComponent(lblTitulo))\n                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))\n        );\n        painelCabecalhoLayout.setVerticalGroup(\n            painelCabecalhoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelCabecalhoLayout.createSequentialGroup()\n                .addGap(16, 16, 16)\n                .addComponent(lblMarca)\n                .addGap(4, 4, 4)\n                .addComponent(lblTitulo)\n                .addGap(16, 16, 16))\n        );\n\n        lblLocal.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblLocal.setForeground(new java.awt.Color(74, 90, 94));\n        lblLocal.setText(\"Local do totem\");\n\n        cbxLocal.setFont(new java.awt.Font(\"Segoe UI\", 0, 16)); // NOI18N\n        cbxLocal.setModel(new javax.swing.DefaultComboBoxModel\u003c>(new String[] { \"Biblioteca\", \"Central de Relacionamento\", \"Financeiro\" }));\n        cbxLocal.addActionListener(new java.awt.event.ActionListener() {\n            public void actionPerformed(java.awt.event.ActionEvent evt) {\n                cbxLocalActionPerformed(evt);\n            }\n        });\n\n        lblNome.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblNome.setForeground(new java.awt.Color(74, 90, 94));\n        lblNome.setText(\"Digite seu nome\");\n\n        lblTipo.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblTipo.setForeground(new java.awt.Color(74, 90, 94));\n        lblTipo.setText(\"Tipo de atendimento\");\n\n        rbNormal.setBackground(new java.awt.Color(244, 246, 245));\n        grupoTipo.add(rbNormal);\n        rbNormal.setFont(new java.awt.Font(\"Segoe UI\", 0, 16)); // NOI18N\n        rbNormal.setSelected(true);\n        rbNormal.setText(\"Normal\");\n\n        rbPrioritario.setBackground(new java.awt.Color(244, 246, 245));\n        grupoTipo.add(rbPrioritario);\n        rbPrioritario.setFont(new java.awt.Font(\"Segoe UI\", 0, 16)); // NOI18N\n        rbPrioritario.setText(\"Prioritário\");\n\n        btnPegarSenha.setBackground(new java.awt.Color(201, 86, 26));\n        btnPegarSenha.setFont(new java.awt.Font(\"Segoe UI\", 1, 18)); // NOI18N\n        btnPegarSenha.setForeground(new java.awt.Color(255, 255, 255));\n        btnPegarSenha.setText(\"PEGAR SENHA\");\n        btnPegarSenha.addActionListener(new java.awt.event.ActionListener() {\n            public void actionPerformed(java.awt.event.ActionEvent evt) {\n                btnPegarSenhaActionPerformed(evt);\n            }\n        });\n\n        painelSenha.setBackground(new java.awt.Color(251, 234, 223));\n\n        lblSuaSenha.setFont(new java.awt.Font(\"Segoe UI\", 0, 14)); // NOI18N\n        lblSuaSenha.setForeground(new java.awt.Color(142, 58, 14));\n        lblSuaSenha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);\n        lblSuaSenha.setText(\"SUA SENHA\");\n\n        lbSenha.setFont(new java.awt.Font(\"Segoe UI\", 1, 46)); // NOI18N\n        lbSenha.setForeground(new java.awt.Color(18, 48, 47));\n        lbSenha.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);\n        lbSenha.setText(\"---\");\n\n        lblMensagem.setFont(new java.awt.Font(\"Segoe UI\", 0, 13)); // NOI18N\n        lblMensagem.setForeground(new java.awt.Color(74, 90, 94));\n        lblMensagem.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);\n        lblMensagem.setText(\"Aguarde ser chamado no painel\");\n\n        javax.swing.GroupLayout painelSenhaLayout = new javax.swing.GroupLayout(painelSenha);\n        painelSenha.setLayout(painelSenhaLayout);\n        painelSenhaLayout.setHorizontalGroup(\n            painelSenhaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelSenhaLayout.createSequentialGroup()\n                .addGap(12, 12, 12)\n                .addGroup(painelSenhaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n                    .addComponent(lblSuaSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lbSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lblMensagem, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))\n                .addGap(12, 12, 12))\n        );\n        painelSenhaLayout.setVerticalGroup(\n            painelSenhaLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelSenhaLayout.createSequentialGroup()\n                .addGap(14, 14, 14)\n                .addComponent(lblSuaSenha)\n                .addGap(4, 4, 4)\n                .addComponent(lbSenha)\n                .addGap(4, 4, 4)\n                .addComponent(lblMensagem)\n                .addGap(14, 14, 14))\n        );\n\n        lblStatus.setFont(new java.awt.Font(\"Segoe UI\", 0, 13)); // NOI18N\n        lblStatus.setForeground(new java.awt.Color(13, 107, 112));\n        lblStatus.setText(\"Central: localhost:50051\");\n\n        javax.swing.GroupLayout painelFundoLayout = new javax.swing.GroupLayout(painelFundo);\n        painelFundo.setLayout(painelFundoLayout);\n        painelFundoLayout.setHorizontalGroup(\n            painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addComponent(painelCabecalho, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n            .addGroup(painelFundoLayout.createSequentialGroup()\n                .addGap(24, 24, 24)\n                .addGroup(painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n                    .addComponent(lblLocal)\n                    .addComponent(cbxLocal, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lblNome)\n                    .addComponent(tfNome)\n                    .addComponent(lblTipo)\n                    .addGroup(painelFundoLayout.createSequentialGroup()\n                        .addComponent(rbNormal)\n                        .addGap(30, 30, 30)\n                        .addComponent(rbPrioritario))\n                    .addComponent(btnPegarSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 380, javax.swing.GroupLayout.PREFERRED_SIZE)\n                    .addComponent(painelSenha, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n                    .addComponent(lblStatus))\n                .addGap(24, 24, 24))\n        );\n        painelFundoLayout.setVerticalGroup(\n            painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addGroup(painelFundoLayout.createSequentialGroup()\n                .addComponent(painelCabecalho, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(18, 18, 18)\n                .addComponent(lblLocal)\n                .addGap(6, 6, 6)\n                .addComponent(cbxLocal, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(14, 14, 14)\n                .addComponent(lblNome)\n                .addGap(6, 6, 6)\n                .addComponent(tfNome, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(14, 14, 14)\n                .addComponent(lblTipo)\n                .addGap(6, 6, 6)\n                .addGroup(painelFundoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)\n                    .addComponent(rbNormal)\n                    .addComponent(rbPrioritario))\n                .addGap(18, 18, 18)\n                .addComponent(btnPegarSenha, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(18, 18, 18)\n                .addComponent(painelSenha, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)\n                .addGap(14, 14, 14)\n                .addComponent(lblStatus)\n                .addGap(16, 16, 16))\n        );\n\n        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());\n        getContentPane().setLayout(layout);\n        layout.setHorizontalGroup(\n            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addComponent(painelFundo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n        );\n        layout.setVerticalGroup(\n            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)\n            .addComponent(painelFundo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)\n        );\n\n        pack();\n        setLocationRelativeTo(null);\n    }// \u003c/editor-fold>//GEN-END:initComponents\n\n    private void btnPegarSenhaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnPegarSenhaActionPerformed\n        String nome = tfNome.getText().trim();\n        if (nome.isEmpty()) {\n            JOptionPane.showMessageDialog(this, \"Digite seu nome.\");\n            return;\n        }\n        String local = (String) cbxLocal.getSelectedItem();\n        TipoAtendimento tipo = rbPrioritario.isSelected()\n                ? TipoAtendimento.PRIORITARIO : TipoAtendimento.NORMAL;\n        PedidoSenha pedido = PedidoSenha.newBuilder()\n                .setNome(nome).setTipo(tipo).setLocal(local).build();\n        try {\n            Senha senha = stub.withDeadlineAfter(5, TimeUnit.SECONDS)\n                    .pegarSenha(pedido);\n            lbSenha.setText(senha.getCodigo());\n            tfNome.setText(\"\");\n        } catch (StatusRuntimeException e) {\n            lbSenha.setText(\"---\");\n            JOptionPane.showMessageDialog(this,\n                    \"Falha na chamada: \" + e.getStatus().getCode());\n        }\n    }//GEN-LAST:event_btnPegarSenhaActionPerformed\n\n    private void cbxLocalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbxLocalActionPerformed\n        // TODO add your handling code here:\n    }//GEN-LAST:event_cbxLocalActionPerformed\n\n    /**\n     * @param args the command line arguments\n     */\n    public static void main(String args[]) {\n        /* Set the Nimbus look and feel */\n        //\u003ceditor-fold defaultstate=\"collapsed\" desc=\" Look and feel setting code (optional) \">\n        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.\n         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html \n         */\n        try {\n            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {\n                if (\"Nimbus\".equals(info.getName())) {\n                    javax.swing.UIManager.setLookAndFeel(info.getClassName());\n                    break;\n                }\n            }\n        } catch (ClassNotFoundException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        } catch (InstantiationException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        } catch (IllegalAccessException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        } catch (javax.swing.UnsupportedLookAndFeelException ex) {\n            java.util.logging.Logger.getLogger(TelaTotem.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);\n        }\n        //\u003c/editor-fold>\n\n        /* Create and display the form */\n        java.awt.EventQueue.invokeLater(new Runnable() {\n            public void run() {\n                new TelaTotem().setVisible(true);\n            }\n        });\n    }\n\n    // Variables declaration - do not modify//GEN-BEGIN:variables\n    private javax.swing.JButton btnPegarSenha;\n    private javax.swing.JComboBox\u003cString> cbxLocal;\n    private javax.swing.ButtonGroup grupoTipo;\n    private javax.swing.JLabel lbSenha;\n    private javax.swing.JLabel lblLocal;\n    private javax.swing.JLabel lblMarca;\n    private javax.swing.JLabel lblMensagem;\n    private javax.swing.JLabel lblNome;\n    private javax.swing.JLabel lblStatus;\n    private javax.swing.JLabel lblSuaSenha;\n    private javax.swing.JLabel lblTipo;\n    private javax.swing.JLabel lblTitulo;\n    private javax.swing.JPanel painelCabecalho;\n    private javax.swing.JPanel painelFundo;\n    private javax.swing.JPanel painelSenha;\n    private javax.swing.JRadioButton rbNormal;\n    private javax.swing.JRadioButton rbPrioritario;\n    private javax.swing.JTextField tfNome;\n    // End of variables declaration//GEN-END:variables\n}\n"},"instr":{"enunciado":"\n\u003cp>\u003cb>O que fazer:\u003c/b> \u003cb>não\u003c/b> substitua o arquivo inteiro: o NetBeans protege o código gerado da tela (o bloco cinza \u003ci>Generated Code\u003c/i>). Selecione o construtor \u003ccode>public TelaTotem() { … }\u003c/code> e cole por cima (\u003cb>Copiar construtor + localizarCentral()\u003c/b>). O método novo fica logo abaixo do construtor.\u003c/p>\n\u003ch4>O que muda\u003c/h4>\u003cul>\n\u003cli>\u003cspan style=\"color:var(--modText);font-weight:700\">1 linha âmbar:\u003c/span> \u003ccode>.forAddress(\"localhost\", 50051)\u003c/code> vira \u003ccode>.forAddress(central.getHost(), central.getPorta())\u003c/code>. Clique na barra âmbar para ver a linha original.\u003c/li>\n\u003cli>\u003cspan style=\"color:var(--addText);font-weight:700\">Verdes:\u003c/span> pergunta ao Serviço de Nomes antes de conectar; o rodapé do totem mostra o endereço que veio do registro.\u003c/li>\n\u003cli>\u003ccode>localizarCentral()\u003c/code>: se der \u003ccode>NOT_FOUND\u003c/code> (ninguém registrou) ou \u003ccode>UNAVAILABLE\u003c/code> (Serviço de Nomes fora do ar), mostra uma mensagem e fecha o totem.\u003c/li>\u003c/ul>\n\u003cp>\u003ccode>Endereco\u003c/code> e \u003ccode>ClienteNomes\u003c/code> estão no mesmo pacote: não precisa de import novo.\u003c/p>"},"snips":{"enunciado":[{"label":"Copiar construtor + localizarCentral()","text":"    public TelaTotem() {\n        initComponents();\n        Endereco central = localizarCentral();   // pergunta ao Serviço de Nomes\n        canal = ManagedChannelBuilder\n                .forAddress(central.getHost(), central.getPorta())\n                .usePlaintext()   // sem TLS: só no laboratório\n                .build();\n        stub = AtendimentoServiceGrpc.newBlockingStub(canal);\n        lblStatus.setText(\"Central \\\"atendimento\\\": \"\n                + central.getHost() + \":\" + central.getPorta());\n        Runtime.getRuntime().addShutdownHook(new Thread(canal::shutdown));\n    }\n\n    // Descobre a Central pelo nome \"atendimento\" antes de conectar\n    private Endereco localizarCentral() {\n        try {\n            return ClienteNomes.localizar(\"atendimento\");\n        } catch (StatusRuntimeException e) {\n            // NOT_FOUND: ninguém registrou o nome; UNAVAILABLE: Serviço de Nomes fora do ar\n            JOptionPane.showMessageDialog(this,\n                    \"Central não localizada: \" + e.getStatus().getCode());\n            System.exit(1);   // sem endereço, o totem não tem a quem pedir senha\n            throw e;          // nunca executa; só para o compilador\n        }\n    }"}]}},"c_teste":{"name":"TesteNomes.java","full":"ClienteAtendimentoRPC/src/main/java/com/mycompany/atendimentorpc/TesteNomes.java","path":"src/main/java/com/mycompany/atendimentorpc/TesteNomes.java","proj":"ClienteAtendimentoRPC","projShort":"cliente","lang":"java","form":false,"text":{"orig":null,"enunciado":"package com.mycompany.atendimentorpc;\n\nimport io.grpc.ManagedChannel;\nimport io.grpc.ManagedChannelBuilder;\nimport io.grpc.StatusRuntimeException;\nimport java.util.concurrent.TimeUnit;\n\n// Testes do Serviço de Nomes: botão direito no arquivo > Run File (Shift+F6)\npublic class TesteNomes {\n\n    public static void main(String[] args) {\n        // Um nome registrado e um que ninguém registrou\n        localizar(\"atendimento\");\n        localizar(\"financeiro\");\n\n        // forTarget: o próprio gRPC resolve o nome DNS \"localhost\" em IP\n        ManagedChannel canal = ManagedChannelBuilder\n                .forTarget(\"dns:///localhost:50051\")\n                .usePlaintext()\n                .build();\n        try {\n            Senha senha = AtendimentoServiceGrpc.newBlockingStub(canal)\n                    .withDeadlineAfter(5, TimeUnit.SECONDS)\n                    .pegarSenha(PedidoSenha.newBuilder()\n                            .setNome(\"Teste DNS\").setLocal(\"TesteNomes\").build());\n            System.out.println(\"forTarget dns:///localhost:50051 -> senha \"\n                    + senha.getCodigo());\n        } catch (StatusRuntimeException e) {\n            System.out.println(\"forTarget dns:///localhost:50051 -> \"\n                    + e.getStatus().getCode());\n        } finally {\n            canal.shutdown();\n        }\n    }\n\n    private static void localizar(String nome) {\n        try {\n            Endereco endereco = ClienteNomes.localizar(nome);\n            System.out.println(\"Localizar \\\"\" + nome + \"\\\" -> \"\n                    + endereco.getHost() + \":\" + endereco.getPorta());\n        } catch (StatusRuntimeException e) {\n            System.out.println(\"Localizar \\\"\" + nome + \"\\\" -> \"\n                    + e.getStatus().getCode());\n        }\n    }\n}\n"},"instr":{"enunciado":"\u003cp>\u003cb>Como criar:\u003c/b> botão direito no pacote \u003ccode>com.mycompany.atendimentorpc\u003c/code> › \u003cb>New › Java Class…\u003c/b> › digite o nome (sem \u003ccode>.java\u003c/code>) › \u003cb>Finish\u003c/b>. Apague o que o NetBeans gerou e cole o arquivo inteiro (botão \u003cb>Copiar arquivo\u003c/b>).\u003c/p>\n\u003cp>Roda com botão direito › \u003cb>Run File\u003c/b> (Shift+F6). Faz os testes 2, 3 e 4 da aba \u003cb>Testes\u003c/b>:\u003c/p>\u003cul>\n\u003cli>\u003ccode>localizar(\"atendimento\")\u003c/code> → \u003ccode>localhost:50051\u003c/code> (ou \u003ccode>NOT_FOUND\u003c/code> depois que a Central saiu).\u003c/li>\n\u003cli>\u003ccode>localizar(\"financeiro\")\u003c/code> → \u003ccode>NOT_FOUND\u003c/code>.\u003c/li>\n\u003cli>\u003ccode>forTarget(\"dns:///localhost:50051\")\u003c/code>: aqui quem resolve o nome não é o nosso registro, é o \u003cb>resolvedor DNS do próprio gRPC\u003c/b>. Ele transforma \u003ccode>localhost\u003c/code> em IP e o totem pega uma senha.\u003c/li>\u003c/ul>"}},"c_pom":{"name":"pom.xml","full":"ClienteAtendimentoRPC/pom.xml","path":"pom.xml","proj":"ClienteAtendimentoRPC","projShort":"cliente","lang":"xml","form":false,"text":{"orig":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\u003cproject xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n    \u003cmodelVersion>4.0.0\u003c/modelVersion>\n    \u003cgroupId>com.mycompany\u003c/groupId>\n    \u003cartifactId>ClienteAtendimentoRPC\u003c/artifactId>\n    \u003cversion>1.0-SNAPSHOT\u003c/version>\n    \u003cpackaging>jar\u003c/packaging>\n    \u003cproperties>\n        \u003cproject.build.sourceEncoding>UTF-8\u003c/project.build.sourceEncoding>\n        \u003cmaven.compiler.release>25\u003c/maven.compiler.release>\n        \u003cexec.mainClass>com.mycompany.atendimentorpc.TelaTotem\u003c/exec.mainClass>\n        \u003cgrpc.version>1.75.0\u003c/grpc.version>\n        \u003cprotobuf.version>3.25.5\u003c/protobuf.version>        \n    \u003c/properties>\n    \u003cname>ClienteAtendimentoRPC\u003c/name>\n    \u003cdependencies>\n    \u003cdependency>\n      \u003cgroupId>io.grpc\u003c/groupId>\n      \u003cartifactId>grpc-netty-shaded\u003c/artifactId>\n      \u003cversion>${grpc.version}\u003c/version>\n    \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-protobuf\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-stub\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>javax.annotation\u003c/groupId>\n          \u003cartifactId>javax.annotation-api\u003c/artifactId>\n          \u003cversion>1.3.2\u003c/version>\n        \u003c/dependency>\n      \u003c/dependencies>    \n    \u003cbuild>\n      \u003cextensions>\n        \u003cextension>\n          \u003cgroupId>kr.motd.maven\u003c/groupId>\n          \u003cartifactId>os-maven-plugin\u003c/artifactId>\n          \u003cversion>1.7.1\u003c/version>\n        \u003c/extension>\n      \u003c/extensions>\n      \u003cplugins>\n        \u003cplugin>\n          \u003cgroupId>org.xolstice.maven.plugins\u003c/groupId>\n          \u003cartifactId>protobuf-maven-plugin\u003c/artifactId>\n          \u003cversion>0.6.1\u003c/version>\n          \u003cconfiguration>\n            \u003cprotocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}\u003c/protocArtifact>\n            \u003cpluginId>grpc-java\u003c/pluginId>\n            \u003cpluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}\u003c/pluginArtifact>\n          \u003c/configuration>\n          \u003cexecutions>\n            \u003cexecution>\n              \u003cgoals>\u003cgoal>compile\u003c/goal>\u003cgoal>compile-custom\u003c/goal>\u003c/goals>\n            \u003c/execution>\n          \u003c/executions>\n        \u003c/plugin>\n      \u003c/plugins>\n    \u003c/build>\n\u003c/project>","enunciado":"\u003c?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\u003cproject xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd\">\n    \u003cmodelVersion>4.0.0\u003c/modelVersion>\n    \u003cgroupId>com.mycompany\u003c/groupId>\n    \u003cartifactId>ClienteAtendimentoRPC\u003c/artifactId>\n    \u003cversion>1.0-SNAPSHOT\u003c/version>\n    \u003cpackaging>jar\u003c/packaging>\n    \u003cproperties>\n        \u003cproject.build.sourceEncoding>UTF-8\u003c/project.build.sourceEncoding>\n        \u003cmaven.compiler.release>25\u003c/maven.compiler.release>\n        \u003cexec.mainClass>com.mycompany.atendimentorpc.TelaTotem\u003c/exec.mainClass>\n        \u003cgrpc.version>1.75.0\u003c/grpc.version>\n        \u003cprotobuf.version>3.25.5\u003c/protobuf.version>        \n    \u003c/properties>\n    \u003cname>ClienteAtendimentoRPC\u003c/name>\n    \u003cdependencies>\n    \u003cdependency>\n      \u003cgroupId>io.grpc\u003c/groupId>\n      \u003cartifactId>grpc-netty-shaded\u003c/artifactId>\n      \u003cversion>${grpc.version}\u003c/version>\n    \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-protobuf\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>io.grpc\u003c/groupId>\n          \u003cartifactId>grpc-stub\u003c/artifactId>\n          \u003cversion>${grpc.version}\u003c/version>\n        \u003c/dependency>\n        \u003cdependency>\n          \u003cgroupId>javax.annotation\u003c/groupId>\n          \u003cartifactId>javax.annotation-api\u003c/artifactId>\n          \u003cversion>1.3.2\u003c/version>\n        \u003c/dependency>\n      \u003c/dependencies>    \n    \u003cbuild>\n      \u003cextensions>\n        \u003cextension>\n          \u003cgroupId>kr.motd.maven\u003c/groupId>\n          \u003cartifactId>os-maven-plugin\u003c/artifactId>\n          \u003cversion>1.7.1\u003c/version>\n        \u003c/extension>\n      \u003c/extensions>\n      \u003cplugins>\n        \u003cplugin>\n          \u003cgroupId>org.xolstice.maven.plugins\u003c/groupId>\n          \u003cartifactId>protobuf-maven-plugin\u003c/artifactId>\n          \u003cversion>0.6.1\u003c/version>\n          \u003cconfiguration>\n            \u003cprotocArtifact>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}\u003c/protocArtifact>\n            \u003cpluginId>grpc-java\u003c/pluginId>\n            \u003cpluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}\u003c/pluginArtifact>\n          \u003c/configuration>\n          \u003cexecutions>\n            \u003cexecution>\n              \u003cgoals>\u003cgoal>compile\u003c/goal>\u003cgoal>compile-custom\u003c/goal>\u003c/goals>\n            \u003c/execution>\n          \u003c/executions>\n        \u003c/plugin>\n      \u003c/plugins>\n    \u003c/build>\n\u003c/project>"},"instr":{}}},"tree":[{"name":"ServidorAtendimentoRPC","groups":[{"name":"Source Packages","icon":"folder","sub":{"name":"com.mycompany.servidoratendimentorpc","icon":"pkg"},"items":["s_impl","s_nomes","s_main","s_srvnom"]},{"name":"Other Sources","icon":"folder","sub":{"name":"src/main/proto","icon":"folder"},"items":["s_proto"]},{"name":"Generated Sources (protobuf)","icon":"gen","hint":"gerado pelo Maven"},{"name":"Dependencies","icon":"lib"},{"name":"Project Files","icon":"folder","items":["s_pom"],"collapsed":true}]},{"name":"ClienteAtendimentoRPC","groups":[{"name":"Source Packages","icon":"folder","sub":{"name":"com.mycompany.atendimentorpc","icon":"pkg"},"items":["c_clin","c_tela","c_teste"]},{"name":"Other Sources","icon":"folder","sub":{"name":"src/main/proto","icon":"folder"},"items":["c_proto"]},{"name":"Generated Sources (protobuf)","icon":"gen","hint":"gerado pelo Maven"},{"name":"Dependencies","icon":"lib"},{"name":"Project Files","icon":"folder","items":["c_pom"],"collapsed":true}]}],"testsHtml":{"enunciado":"\u003ch3>Testes (Trabalho 5 — Serviço de nomes)\u003c/h3>\u003cp style=\"color:var(--muted)\">Os testes vêm do slide \"TRABALHO 5\" do PDF da Aula 10. Resultados conferidos compilando e rodando o projeto.\u003c/p>\u003ctable class=\"tests\">\u003ctr>\u003cth>#\u003c/th>\u003cth>Teste\u003c/th>\u003cth>Como\u003c/th>\u003cth>Resultado real\u003c/th>\u003c/tr>\u003ctr>\u003ctd>1\u003c/td>\u003ctd>Totens 1, 2 e 3 localizam \"atendimento\" e pegam senhas da mesma fila\u003c/td>\u003ctd>TelaTotem 3× (Run File)\u003c/td>\u003ctd>Central: \u003ccode>N-001\u003c/code> Biblioteca, \u003ccode>P-002\u003c/code> Central de Relacionamento, \u003ccode>N-003\u003c/code> Financeiro\u003c/td>\u003c/tr>\u003ctr>\u003ctd>2\u003c/td>\u003ctd>Localizar \"financeiro\" → NOT_FOUND\u003c/td>\u003ctd>TesteNomes\u003c/td>\u003ctd>\u003ccode>Localizar \"financeiro\" -&gt; NOT_FOUND\u003c/code>\u003c/td>\u003c/tr>\u003ctr>\u003ctd>3\u003c/td>\u003ctd>Encerrar o \"atendimento\" → sai do registro\u003c/td>\u003ctd>ENTER na Central, TesteNomes de novo\u003c/td>\u003ctd>\u003ccode>Removido: atendimento\u003c/code> → \u003ccode>Localizar \"atendimento\" -&gt; NOT_FOUND\u003c/code>\u003c/td>\u003c/tr>\u003ctr>\u003ctd>4\u003c/td>\u003ctd>Conectar pelo nome, via DNS, com forTarget\u003c/td>\u003ctd>TesteNomes\u003c/td>\u003ctd>\u003ccode>forTarget dns:///localhost:50051 -&gt; senha N-004\u003c/code>\u003c/td>\u003c/tr>\u003ctr>\u003ctd>+\u003c/td>\u003ctd>\u003ci>Extra:\u003c/i> a Central cai sem avisar (Stop)\u003c/td>\u003ctd>Stop na Central, TesteNomes\u003c/td>\u003ctd>Localizar ainda devolve \u003ccode>localhost:50051\u003c/code>, mas a conexão dá \u003ccode>UNAVAILABLE\u003c/code>\u003c/td>\u003c/tr>\u003c/table>\u003ch4>O que a professora pede para explicar\u003c/h4>\u003cul>\n\u003cli>\u003cb>Como o gRPC transforma um nome em IP e porta:\u003c/b> o canal recebe um \u003ci>target\u003c/i> no formato URI (\u003ccode>esquema:///nome:porta\u003c/code>). O resolvedor do esquema (DNS, se nenhum for dito) devolve a lista de endereços, e a política de balanceamento escolhe um. O nosso mini-registro faz esse papel \"na mão\", antes de criar o canal.\u003cbr>\u003cspan style=\"color:var(--muted)\">Fonte: grpc.io/docs/guides/custom-name-resolution (seções \u003ci>Overview\u003c/i> e \u003ci>Life of a Target String\u003c/i>)\u003c/span>\u003c/li>\n\u003cli>\u003cb>Quando usar:\u003c/b> quando o endereço muda (Central trocou de máquina ou porta) ou quando há várias cópias da Central.\u003c/li>\n\u003cli>\u003cb>Rede real:\u003c/b> DNS; no Kubernetes cada Service ganha um nome DNS (ex.: \u003ccode>atendimento.default.svc.cluster.local\u003c/code>); com vários endereços para o mesmo nome, a política \u003ccode>round_robin\u003c/code> reparte as chamadas entre eles.\u003c/li>\n\u003cli>\u003cb>Por que quem cai precisa sair do registro:\u003c/b> senão o registro entrega um endereço morto e o totem só descobre na hora da chamada (\u003ccode>UNAVAILABLE\u003c/code>). Registros de verdade usam verificação de saúde ou expiração.\u003cbr>\u003cspan style=\"color:var(--muted)\">Fonte dos códigos: grpc.io/docs/guides/status-codes (NOT_FOUND e UNAVAILABLE)\u003c/span>\u003c/li>\u003c/ul>"},"helpHtml":{"enunciado":"\u003ch3>Problemas comuns\u003c/h3>\u003cul>\n\u003cli>\u003cb>A Central encerra logo ao subir com \u003ccode>UNAVAILABLE\u003c/code>:\u003c/b> o \u003cb>ServidorNomes\u003c/b> não está rodando. Rode ele primeiro (Run File).\u003c/li>\n\u003cli>\u003cb>Totem mostra \"Central não localizada: NOT_FOUND\":\u003c/b> a Central não está registrada (não subiu, ou alguém apertou ENTER nela).\u003c/li>\n\u003cli>\u003cb>Totem mostra \"Central não localizada: UNAVAILABLE\":\u003c/b> o ServidorNomes está fora do ar.\u003c/li>\n\u003cli>\u003cb>ENTER não faz nada:\u003c/b> clique dentro da aba de Output \u003cb>da Central\u003c/b> (ServidorAtendimentoRPC) antes de apertar ENTER.\u003c/li>\n\u003cli>\u003cb>Linhas WARNING sobre \u003ccode>sun.misc.Unsafe\u003c/code>\u003c/b> no Output: vêm do Netty no JDK novo. Pode ignorar.\u003c/li>\n\u003cli>\u003cb>Classes do .proto não aparecem / \"cannot find symbol\":\u003c/b> Clean and Build nos dois projetos. Persistiu: apague \u003ccode>target\u003c/code> (aba Files) e repita.\u003c/li>\n\u003cli>\u003cb>\"Address already in use\"\u003c/b> (porta 50051 ou 50052 ocupada): já tem uma execução antiga rodando. Pare as execuções antigas no Output (quadrado vermelho) e rode de novo.\u003c/li>\n\u003cli>\u003cb>Os dois \u003ccode>.proto\u003c/code> estão iguais?\u003c/b> Qualquer diferença entre cliente e servidor quebra a chamada.\u003c/li>\n\u003cli>\u003cb>Máquinas diferentes:\u003c/b> troque \u003ccode>localhost\u003c/code> pelo IP do servidor no registro (\u003ccode>setHost\u003c/code>) e em \u003ccode>HOST_NOMES\u003c/code> do ClienteNomes.\u003c/li>\u003c/ul>"}}</script>
+<script>
+(function(){
+'use strict';
+const D = JSON.parse(document.getElementById('data').textContent);
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ---------------- diff (LCS por linha, ignora espaços no fim) ---------------- */
+function diffLines(a, b){
+  const A = a.map(s => s.replace(/\s+$/,'')), B = b.map(s => s.replace(/\s+$/,''));
+  const n = A.length, m = B.length;
+  const L = Array.from({length:n+1}, () => new Uint16Array(m+1));
+  for (let i=n-1;i>=0;i--) for (let j=m-1;j>=0;j--) L[i][j] = A[i]===B[j] ? L[i+1][j+1]+1 : Math.max(L[i+1][j], L[i][j+1]);
+  const ops = []; let i=0, j=0;
+  while (i<n && j<m){
+    if (A[i]===B[j]) { ops.push({t:'=', a:i, b:j}); i++; j++; }
+    else if (L[i+1][j] >= L[i][j+1]) { ops.push({t:'-', a:i}); i++; }
+    else { ops.push({t:'+', b:j}); j++; }
+  }
+  while (i<n) ops.push({t:'-', a:i++});
+  while (j<m) ops.push({t:'+', b:j++});
+  return ops;
+}
+function bigrams(s){ s = s.trim(); const r = new Map(); for (let i=0;i<s.length-1;i++){ const g=s.substr(i,2); r.set(g,(r.get(g)||0)+1);} return r; }
+function sim(x, y){
+  x = x.trim(); y = y.trim(); if (!x && !y) return 1; if (!x || !y) return 0;
+  const X = bigrams(x), Y = bigrams(y); let inter = 0, tot = 0;
+  X.forEach((v,k) => { inter += Math.min(v, Y.get(k)||0); tot += v; }); Y.forEach(v => tot += v);
+  return tot ? 2*inter/tot : 0;
+}
+/* Classifica as linhas do arquivo novo (b): '' igual, 'a' nova, 'm' alterada (com old), e marca remoções */
+function classify(aLines, bLines){
+  const ops = diffLines(aLines, bLines);
+  const rows = bLines.map(t => ({t, s:'', old:null, delBefore:null}));
+  let k = 0, removedTail = null;
+  while (k < ops.length){
+    if (ops[k].t === '='){ k++; continue; }
+    const dels = [], ins = [];
+    while (k < ops.length && ops[k].t !== '='){ if (ops[k].t==='-') dels.push(ops[k].a); else ins.push(ops[k].b); k++; }
+    const used = new Set(), pairs = new Map();
+    let from = 0;
+    const limiar = dels.length === ins.length ? 0.12 : 0.35;  // troca 1 por 1 = linha alterada
+    dels.forEach(di => {
+      let best = -1, bs = limiar;
+      for (let x=from; x<ins.length; x++){ const v = sim(aLines[di], bLines[ins[x]]); if (v > bs){ bs = v; best = x; } }
+      if (best >= 0){ pairs.set(ins[best], di); used.add(di); from = best+1; }
+    });
+    ins.forEach(bi => { if (pairs.has(bi)){ rows[bi].s='m'; rows[bi].old = aLines[pairs.get(bi)]; } else rows[bi].s='a'; });
+    const lost = dels.filter(d => !used.has(d)).map(d => aLines[d]);
+    if (lost.length){
+      const at = ins.length ? ins[0] : (k < ops.length ? ops[k].b : null);
+      if (at === null || at === undefined) removedTail = lost; else rows[at].delBefore = (rows[at].delBefore||[]).concat(lost);
+    }
+  }
+  return {rows, removedTail};
+}
+
+/* ---------------- realce de sintaxe ---------------- */
+const KW = {
+  java: new Set('abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for goto if implements import instanceof int interface long native new package private protected public return short static strictfp super switch synchronized this throw throws transient try void volatile while var true false null record'.split(' ')),
+  proto: new Set('syntax package option import service rpc returns message enum repeated optional reserved stream string int32 int64 uint32 uint64 bool bytes double float map oneof true false'.split(' '))
+};
+function hl(line, lang, st){
+  if (lang === 'xml') return hlXml(line);
+  let out = '', i = 0; const n = line.length; const kw = KW[lang] || KW.java;
+  let prevWord = '';
+  if (st.inC){
+    const e = line.indexOf('*/');
+    if (e < 0) return '<span class="c">'+esc(line)+'</span>';
+    out += '<span class="c">'+esc(line.slice(0,e+2))+'</span>'; i = e+2; st.inC = false;
+  }
+  while (i < n){
+    const ch = line[i], rest = line.slice(i);
+    if (rest.startsWith('//')){ out += '<span class="c">'+esc(rest)+'</span>'; break; }
+    if (rest.startsWith('/*')){
+      const e = line.indexOf('*/', i+2);
+      if (e < 0){ out += '<span class="c">'+esc(rest)+'</span>'; st.inC = true; break; }
+      out += '<span class="c">'+esc(line.slice(i,e+2))+'</span>'; i = e+2; continue;
+    }
+    if (ch === '"' || ch === "'"){
+      let j = i+1; while (j < n && line[j] !== ch){ if (line[j]==='\\') j++; j++; }
+      out += '<span class="s">'+esc(line.slice(i,j+1))+'</span>'; i = j+1; continue;
+    }
+    if (ch === '@' && /[A-Za-z]/.test(line[i+1]||'')){
+      const m = /^@[A-Za-z_]\w*/.exec(rest); out += '<span class="an">'+esc(m[0])+'</span>'; i += m[0].length; continue;
+    }
+    if (/[0-9]/.test(ch) && !/[\w]/.test(line[i-1]||'')){
+      const m = /^\d+[\w.]*/.exec(rest); out += '<span class="nu">'+esc(m[0])+'</span>'; i += m[0].length; continue;
+    }
+    if (/[A-Za-z_$]/.test(ch)){
+      const m = /^[A-Za-z_$][\w$]*/.exec(rest); const w = m[0];
+      if (kw.has(w)) out += '<span class="k">'+w+'</span>';
+      else if (/^(class|interface|enum|service|message|rpc)$/.test(prevWord)) out += '<span class="dc">'+w+'</span>';
+      else out += esc(w);
+      prevWord = w; i += w.length; continue;
+    }
+    if (!/\s/.test(ch)) prevWord = '';
+    out += esc(ch); i++;
+  }
+  return out;
+}
+/* Uma passada só sobre o texto cru: substituições em cadeia casariam com o HTML que elas mesmas inserem */
+function hlXml(line){
+  const re = /(<!--.*?-->)|(<\/?)([\w:.-]+)|([\w:-]+)=("[^"]*")|(\$\{[^}]+\})/g;
+  let out = '', last = 0, m;
+  while ((m = re.exec(line))){
+    out += esc(line.slice(last, m.index));
+    if (m[1]) out += '<span class="c">'+esc(m[1])+'</span>';
+    else if (m[2]) out += esc(m[2])+'<span class="xt">'+esc(m[3])+'</span>';
+    else if (m[4]) out += '<span class="xa">'+esc(m[4])+'</span>=<span class="s">'+esc(m[5])+'</span>';
+    else out += '<span class="s">'+esc(m[6])+'</span>';
+    last = re.lastIndex;
+  }
+  return out + esc(line.slice(last));
+}
+
+/* ---------------- estado ---------------- */
+const LS = k => { try { return localStorage.getItem('gsn.'+k); } catch(e){ return null; } };
+const SS = (k,v) => { try { localStorage.setItem('gsn.'+k, v); } catch(e){} };
+const state = { ver: D.defaultVersion, open: [], cur: null, btab: 'instr', out: 0, folds: {} };
+const theme = LS('theme'); if (theme) document.documentElement.setAttribute('data-theme', theme);
+
+function V(){ return D.versions[state.ver]; }
+function fileStatus(ver, id){
+  const f = D.files[id];
+  const t = f.text[ver];
+  if (t == null) return 'ausente';
+  if (f.text.orig == null) return 'novo';
+  return t.replace(/\s+$/gm,'') === f.text.orig.replace(/\s+$/gm,'') ? 'igual' : 'alterado';
+}
+function statusOf(id){ return fileStatus(state.ver, id); }
+function visible(id){ return statusOf(id) !== 'ausente'; }
+
+/* ---------------- ícones ---------------- */
+const IC = {
+  proj: '<svg viewBox="0 0 16 16"><path d="M2 4.5 8 1.5l6 3v7l-6 3-6-3z" fill="#5b8fd0" stroke="#2f5f9e"/><path d="M2 4.5l6 3 6-3M8 7.5v7" stroke="#2f5f9e" fill="none"/></svg>',
+  folder: '<svg viewBox="0 0 16 16"><path d="M1.5 3.5h4.5l1.5 1.5h7v8.5h-13z" fill="#e8b84a" stroke="#b78a22"/></svg>',
+  pkg: '<svg viewBox="0 0 16 16"><path d="M2 5l6-3 6 3v6.5l-6 3-6-3z" fill="#d9a35b" stroke="#9c6a26"/><path d="M2 5l6 3 6-3M8 8v6.5" stroke="#9c6a26" fill="none"/></svg>',
+  java: '<svg viewBox="0 0 16 16"><path d="M3 1.5h7l3 3v10H3z" fill="#fff" stroke="#7d8a99"/><circle cx="8" cy="9.5" r="3.6" fill="#e07b2a"/><text x="8" y="11.6" font-size="5.6" font-family="Arial" font-weight="700" fill="#fff" text-anchor="middle">C</text></svg>',
+  form: '<svg viewBox="0 0 16 16"><path d="M3 1.5h7l3 3v10H3z" fill="#fff" stroke="#7d8a99"/><rect x="4.5" y="6" width="7" height="6" fill="#7aa7de" stroke="#2f5f9e"/><path d="M4.5 7.6h7" stroke="#2f5f9e"/></svg>',
+  proto: '<svg viewBox="0 0 16 16"><path d="M3 1.5h7l3 3v10H3z" fill="#fff" stroke="#7d8a99"/><rect x="4.3" y="7" width="7.4" height="5" rx="1" fill="#2e9e8f"/><text x="8" y="11" font-size="4" font-family="Arial" font-weight="700" fill="#fff" text-anchor="middle">PB</text></svg>',
+  xml: '<svg viewBox="0 0 16 16"><path d="M3 1.5h7l3 3v10H3z" fill="#fff" stroke="#7d8a99"/><path d="M6.5 7.5 4.8 9.5l1.7 2M9.5 7.5l1.7 2-1.7 2" stroke="#c0392b" fill="none" stroke-width="1.2"/></svg>',
+  lib: '<svg viewBox="0 0 16 16"><rect x="2.5" y="3" width="3" height="10" fill="#9aa5b1"/><rect x="6.5" y="3" width="3" height="10" fill="#7d8a99"/><rect x="10.5" y="4" width="3" height="9" fill="#b7c0ca"/></svg>',
+  gen: '<svg viewBox="0 0 16 16"><path d="M1.5 3.5h4.5l1.5 1.5h7v8.5h-13z" fill="#c9c9c9" stroke="#8d8d8d"/><path d="M9.5 8.5l2 1.5-2 1.5" stroke="#555" fill="none"/></svg>',
+  copy: '<svg viewBox="0 0 16 16"><rect x="5" y="5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M11 5V3a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>',
+  up: '<svg viewBox="0 0 16 16"><path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  down: '<svg viewBox="0 0 16 16"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>',
+  check: '<svg viewBox="0 0 16 16"><path d="M3 8.5l3.2 3.2L13 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  fail: '<svg viewBox="0 0 16 16"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+};
+function iconFor(f){ return f.lang === 'proto' ? IC.proto : f.lang === 'xml' ? IC.xml : (f.form ? IC.form : IC.java); }
+
+/* ---------------- toolbar / legenda ---------------- */
+function renderToolbar(){
+  const lg = '<span><i style="background:var(--addBar)"></i>novo</span><span><i style="background:var(--modBar)"></i>alterado</span><span><i style="background:var(--delBar)"></i>removido</span><span style="opacity:.8">diff contra o projeto cru</span>';
+  $('#legend').innerHTML = lg;
+}
+
+/* ---------------- árvore ---------------- */
+function renderTree(){
+  const T = $('#tree'); let html = '';
+  D.tree.forEach(p => {
+    html += '<li><div class="node" style="--d:0" data-tog><span class="tw">▼</span>'+IC.proj+'<span class="nm"><b>'+p.name+'</b></span></div><ul>';
+    p.groups.forEach(g => {
+      const ids = g.items ? g.items.filter(visible) : [];
+      if (g.items && !ids.length) return;
+      const anyChg = ids.some(id => statusOf(id) !== 'igual');
+      html += '<li'+(g.collapsed?' class="collapsed"':'')+'><div class="node'+(g.items?'':' dim')+'" style="--d:1" '+(g.items?'data-tog':'')+' title="'+esc(g.hint||'')+'"><span class="tw">'+(g.items?(g.collapsed?'▶':'▼'):'▶')+'</span>'+IC[g.icon]+'<span class="nm">'+g.name+'</span>'+(anyChg?'<span class="dot" title="contém mudanças"></span>':'')+'</div>';
+      if (g.items){
+        const dd = g.sub ? 3 : 2;
+        html += '<ul>' + (g.sub ? '<li><div class="node" style="--d:2" data-tog><span class="tw">▼</span>'+IC[g.sub.icon]+'<span class="nm">'+g.sub.name+'</span>'+(anyChg?'<span class="dot"></span>':'')+'</div><ul>' : '');
+        ids.forEach(id => {
+          const f = D.files[id], st = statusOf(id);
+          const cls = st === 'novo' ? 'novo' : st === 'alterado' ? 'alterado' : '';
+          const badge = (st === 'novo' ? '<span class="badge novo">NOVO</span>' : st === 'alterado' ? '<span class="badge alterado">ALTERADO</span>' : '');
+          html += '<li><div class="node file '+cls+(state.cur===id?' sel':'')+'" style="--d:'+dd+'" data-file="'+id+'" title="'+esc(f.full)+'"><span class="tw"></span>'+iconFor(f)+'<span class="nm">'+f.name+'</span>'+badge+'</div></li>';
+        });
+        html += (g.sub ? '</ul></li>' : '') + '</ul>';
+      }
+      html += '</li>';
+    });
+    html += '</ul></li>';
+  });
+  T.innerHTML = html;
+}
+$('#tree').addEventListener('click', e => {
+  const n = e.target.closest('.node'); if (!n) return;
+  if (n.dataset.file){ openFile(n.dataset.file); if (innerWidth <= 860) $('#left').classList.remove('open'); return; }
+  if (n.hasAttribute('data-tog')){ const li = n.parentElement; li.classList.toggle('collapsed'); n.querySelector('.tw').textContent = li.classList.contains('collapsed') ? '▶' : '▼'; }
+});
+
+/* ---------------- roteiro ---------------- */
+function steps(){ return V().steps; }
+function renderSteps(){
+  $('#steps').innerHTML = steps().map((s,i) => {
+    const tag = s.kind ? '<span class="tag '+s.kind+'">'+({novo:'NOVO',alterado:'ALTERAR',run:'EXECUTAR'}[s.kind]||'')+'</span>' : '';
+    return '<li class="step'+(state.step===i?' sel':'')+'" data-i="'+i+'"><span class="n">'+(i+1)+'</span><span><div class="t">'+tag+esc(s.title)+'</div>'+(s.sub?'<div class="s">'+esc(s.sub)+'</div>':'')+'</span></li>';
+  }).join('');
+}
+$('#steps').addEventListener('click', e => {
+  const li = e.target.closest('.step'); if (!li) return;
+  const s = steps()[+li.dataset.i]; state.step = +li.dataset.i;
+  if (s.file) openFile(s.file, true); else { state.btab = s.tab || 'instr'; if (s.out != null) state.out = s.out; renderBottom(); }
+  if (s.file && s.tab){ state.btab = s.tab; renderBottom(); }
+  renderSteps();
+  if (innerWidth <= 860) $('#left').classList.remove('open');
+});
+
+/* ---------------- editor ---------------- */
+function openFile(id, fromStep){
+  if (!visible(id)) return;
+  if (!state.open.includes(id)) state.open.push(id);
+  state.cur = id; SS('cur', id);
+  if (!fromStep){ const i = steps().findIndex(s => s.file === id); state.step = i >= 0 ? i : null; }
+  state.btab = 'instr';
+  renderTree(); renderTabs(); renderEditor(); renderBottom(); renderSteps(); renderStatus();
+}
+function closeFile(id){
+  state.open = state.open.filter(x => x !== id);
+  if (state.cur === id) state.cur = state.open[state.open.length-1] || null;
+  renderTree(); renderTabs(); renderEditor(); renderBottom(); renderStatus();
+}
+function renderTabs(){
+  state.open = state.open.filter(visible);
+  if (state.cur && !visible(state.cur)) state.cur = state.open[0] || null;
+  $('#etabs').innerHTML = state.open.map(id => {
+    const f = D.files[id], st = statusOf(id);
+    return '<div class="etab '+(st==='novo'?'novo':st==='alterado'?'alterado':'')+(id===state.cur?' on':'')+'" role="tab" data-id="'+id+'">'+iconFor(f)+'<span class="lbl">'+f.name+'</span><span class="hint" style="color:var(--muted);font-size:11px">'+f.projShort+'</span><button class="x" title="Fechar" data-close="'+id+'">×</button></div>';
+  }).join('');
+  // a aba ativa sempre fica à vista, mesmo com muitas abas abertas
+  const bar = $('#etabs'), on = bar.querySelector('.etab.on');
+  if (on){
+    const l = on.offsetLeft, r = l + on.offsetWidth;
+    if (l < bar.scrollLeft) bar.scrollLeft = l;
+    else if (r > bar.scrollLeft + bar.clientWidth) bar.scrollLeft = r - bar.clientWidth;
+  }
+}
+$('#etabs').addEventListener('click', e => {
+  const x = e.target.closest('[data-close]'); if (x){ e.stopPropagation(); closeFile(x.dataset.close); return; }
+  const t = e.target.closest('.etab'); if (t) openFile(t.dataset.id);
+});
+// roda do mouse rola as abas na horizontal, como no NetBeans
+$('#etabs').addEventListener('wheel', e => {
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){ e.currentTarget.scrollLeft += e.deltaY; e.preventDefault(); }
+}, {passive: false});
+
+let hunks = [], hunkIdx = -1;
+function buildRows(id, ver){
+  const f = D.files[id];
+  const base = (f.text.orig == null ? '' : f.text.orig).split('\n');
+  const txt = f.text[ver].split('\n');
+  if (base[base.length-1] === '') base.pop();
+  if (txt[txt.length-1] === '') txt.pop();
+  if (f.text.orig == null) return {rows: txt.map(t => ({t, s:'a'})), removedTail:null};
+  return classify(base, txt);
+}
+function foldRanges(rows){
+  const r = [], stack = [];
+  rows.forEach((row,i) => {
+    const m = /\/\/\s*<editor-fold\b([^>]*)>/.exec(row.t);
+    if (m){ const d = /desc="([^"]*)"/.exec(m[1]); stack.push({start:i, desc: d ? d[1].trim() : '...', collapsed: /defaultstate="collapsed"/.test(m[1])}); }
+    else if (/\/\/\s*<\/editor-fold>/.test(row.t) && stack.length){ const o = stack.pop(); o.end = i; r.push(o); }
+  });
+  return r;
+}
+/* Comentário ou linha vazia: sozinhos não justificam um "Copiar bloco" */
+function isNoise(t, lang){
+  const s = t.trim();
+  return !s || (lang === 'xml' ? s.startsWith('<!--') : /^(\/\/|\/\*|\*)/.test(s));
+}
+/* Blocos de linhas novas/alteradas seguidas; o texto copiado ignora linhas vazias nas pontas */
+function changeGroups(rows, lang){
+  const groups = []; let cur = null;
+  rows.forEach((r,i) => {
+    if ((r.s==='a'||r.s==='m') && !r.ghost){ if (cur) cur.end = i; else groups.push(cur = {start:i, end:i}); }
+    else cur = null;
+  });
+  groups.forEach(g => {
+    const idx = []; for (let i=g.start;i<=g.end;i++) idx.push(i);
+    const cheias = idx.filter(i => rows[i].t.trim());
+    g.useful = idx.some(i => !isNoise(rows[i].t, lang));
+    g.head = cheias.length ? cheias[0] : g.start;
+    g.text = cheias.length ? rows.slice(cheias[0], cheias[cheias.length-1]+1).map(r => r.t).join('\n') : '';
+  });
+  return groups;
+}
+function linesHtml(id, rows, opts){
+  opts = opts || {};
+  const lang = D.files[id].lang, st = {inC:false};
+  const folds = opts.noFold ? [] : foldRanges(rows);
+  const fkey = id + '|' + (opts.key||'');
+  const fstate = state.folds[fkey] || (state.folds[fkey] = folds.map(f => f.collapsed && !rows.slice(f.start, f.end+1).some(r => r.s)));
+  const hidden = new Set(), foldAt = new Map();
+  folds.forEach((f,k) => { foldAt.set(f.start, k); if (fstate[k]) for (let i=f.start+1;i<=f.end;i++) hidden.add(i); });
+  const gw = String(rows.length).length * 8 + 22;
+  const groups = changeGroups(rows, lang), grupoDe = new Map();
+  groups.forEach((g,k) => { if (g.useful) for (let i=g.start;i<=g.end;i++) grupoDe.set(i, k); });
+  let html = '';
+  rows.forEach((row,i) => {
+    const code = row.ghost ? '' : hl(row.t, lang, st);
+    if (hidden.has(i)) return;
+    const s = row.s, hk = grupoDe.get(i);
+    let cls = 'ln' + (s ? ' '+s : '') + (row.ghost ? ' ghost' : '');
+    let extra = '';
+    if (hk != null && groups[hk].head === i){ cls += ' hunkhead'; extra = '<button class="hcopy" data-hunk="'+hk+'">Copiar bloco</button>'; }
+    const k = foldAt.get(i);
+    const fd = k != null ? '<span class="fd can" data-fold="'+k+'" title="Recolher/expandir">'+(fstate[k]?'⊞':'⊟')+'</span>' : '<span class="fd"></span>';
+    let tx = code;
+    if (k != null && fstate[k]){
+      const ind = (/^\s*/.exec(row.t)||[''])[0];
+      tx = esc(ind) + '<span class="foldbox" data-fold="'+k+'">'+esc(folds[k].desc)+'</span>';
+    }
+    const del = row.delBefore ? '<span class="delmark" data-del="'+i+'" title="Linhas removidas aqui"></span>' : '';
+    html += '<div class="'+cls+'" data-i="'+i+'"'+(hk!=null?' data-h="'+hk+'"':'')+'><span class="no">'+(row.ghost?'':(row.no||i+1))+'</span>'+fd+'<span class="bar"'+(s==='m'?' data-old="'+i+'"':'')+'></span><span class="tx">'+(tx||' ')+'</span>'+del+extra+'</div>';
+  });
+  return {html, gw, groups};
+}
+function renderEditor(){
+  const W = $('#codewrap'), T = $('#etool');
+  if (!state.cur){
+    T.innerHTML = '';
+    W.innerHTML = '<div class="empty"><div><h2>Abra um arquivo</h2><p>Clique num arquivo da árvore à esquerda ou siga o <b>Roteiro</b>.<br>Arquivos <span style="color:var(--addText);font-weight:600">verdes</span> são novos; <span style="color:var(--modText);font-weight:600">âmbar</span> foram alterados.</p></div></div>';
+    return;
+  }
+  const id = state.cur, f = D.files[id];
+  const st = fileStatus(state.ver, id);
+  const {rows, removedTail} = buildRows(id, state.ver);
+  const r = linesHtml(id, rows, {key: state.ver});
+  const nA = rows.filter(x => x.s==='a').length, nM = rows.filter(x => x.s==='m').length, nD = rows.reduce((s,x)=>s+(x.delBefore?x.delBefore.length:0),0) + (removedTail?removedTail.length:0);
+  T.innerHTML =
+    '<div class="seg"><button class="on">Source</button><button disabled title="Só no NetBeans">'+(f.form?'Design':'History')+'</button></div>' +
+    '<span class="crumb" title="'+esc(f.full)+'">'+esc(f.full)+'</span>' +
+    (st==='igual' ? '<span class="chg">sem alterações</span>' : '<span class="chg">'+(nA?'<b style="color:var(--addText)">+'+nA+'</b> ':'')+(nM?'<b style="color:var(--modText)">~'+nM+'</b> ':'')+(nD?'<b style="color:var(--delText)">−'+nD+'</b>':'')+'</span>') +
+    '<button class="btn" id="prevH" title="Mudança anterior (Alt+↑)">'+IC.up+'</button><button class="btn" id="nextH" title="Próxima mudança (Alt+↓)">'+IC.down+'</button>' +
+    ((f.snips && f.snips[state.ver]) || []).map((s,k) => '<button class="btn primary" data-snip="'+k+'">'+IC.copy+esc(s.label)+'</button>').join('') +
+    '<button class="btn'+(f.snips && f.snips[state.ver] ? '' : ' primary')+'" id="copyAll">'+IC.copy+(st==='novo'?'Copiar arquivo':'Copiar arquivo inteiro')+'</button>';
+  T.querySelectorAll('[data-snip]').forEach(b => b.onclick = () => { const s = f.snips[state.ver][+b.dataset.snip]; copy(s.text, s.label.replace(/^Copiar /,'') + ' copiado', b); });
+  W.innerHTML = '<div class="code" id="code" style="--gw:'+r.gw+'px"><div class="inner">'+r.html+(removedTail?'<div class="ln r"><span class="no"></span><span class="fd"></span><span class="bar"></span><span class="tx">'+esc('[removido no fim] '+removedTail.join(' ⏎ '))+'</span></div>':'')+'</div></div><div class="ruler" id="ruler" title="Mapa de mudanças"></div>';
+  const uteis = r.groups.filter(g => g.useful);
+  hunks = (uteis.length ? uteis : r.groups).map(g => g.head); hunkIdx = -1;
+  wireCode($('#code'), rows, id, r.groups);
+  drawRuler(rows);
+  $('#copyAll').onclick = e => copy(f.text[state.ver], 'Arquivo copiado', e.currentTarget);
+  $('#prevH').onclick = () => jumpHunk(-1);
+  $('#nextH').onclick = () => jumpHunk(1);
+  const first = $('#code .ln.a, #code .ln.m');
+  if (first && st !== 'novo'){ const c = $('#code'); c.scrollTop = Math.max(0, first.offsetTop - 60); }
+}
+function wireCode(code, rows, id, groups){
+  code.addEventListener('click', e => {
+    const fb = e.target.closest('[data-fold]');
+    if (fb){
+      const key = id + '|' + (code.dataset.key || state.ver);
+      const k = +fb.dataset.fold; state.folds[key][k] = !state.folds[key][k];
+      const top = code.scrollTop; renderEditor(); $('#code') && ($('#code').scrollTop = top); return;
+    }
+    const hc = e.target.closest('.hcopy');
+    if (hc){ copy(groups[+hc.dataset.hunk].text, 'Bloco copiado', hc); return; }
+    const ob = e.target.closest('[data-old]');
+    if (ob){ const i = +ob.dataset.old; showPop(ob, 'Linha original (projeto cru)', rows[i].old); return; }
+    const dm = e.target.closest('[data-del]');
+    if (dm){ const i = +dm.dataset.del; showPop(dm, 'Linhas removidas aqui', rows[i].delBefore.join('\n')); return; }
+    const ln = e.target.closest('.ln');
+    if (ln){ code.querySelectorAll('.ln.cur').forEach(x => x.classList.remove('cur')); ln.classList.add('cur'); const i = +ln.dataset.i; $('#pos').textContent = (i+1)+':1'; }
+  });
+  code.addEventListener('mouseover', e => {
+    const ln = e.target.closest('.ln[data-h]');
+    code.querySelectorAll('.hov').forEach(x => x.classList.remove('hov'));
+    if (!ln) return;
+    const h = code.querySelector('.ln.hunkhead[data-h="'+ln.dataset.h+'"]');
+    if (h){ h.classList.add('hov'); const b = h.querySelector('.hcopy'); if (b){ b.style.right = 'auto'; b.style.left = Math.max(80, code.scrollLeft + code.clientWidth - b.offsetWidth - 14) + 'px'; } }
+  });
+  code.addEventListener('mouseleave', () => code.querySelectorAll('.hov').forEach(x => x.classList.remove('hov')));
+}
+function drawRuler(rows){
+  const R = $('#ruler'); if (!R) return; const n = rows.length || 1; let h = '';
+  let i = 0;
+  while (i < rows.length){
+    const s = rows[i].s;
+    if (!s && !rows[i].delBefore){ i++; continue; }
+    if (!s && rows[i].delBefore){ h += '<i class="d" style="top:'+(i/n*100)+'%;height:3px" data-go="'+i+'"></i>'; i++; continue; }
+    let j = i; while (j < rows.length && rows[j].s === s) j++;
+    h += '<i class="'+(s==='m'?'m':s==='r'?'d':'a')+'" style="top:'+(i/n*100)+'%;height:'+Math.max(3,(j-i)/n*100)+'%" data-go="'+i+'"></i>';
+    i = j;
+  }
+  R.innerHTML = h;
+  R.onclick = e => {
+    const g = e.target.closest('[data-go]'); const c = $('#code');
+    if (g){ const el = c.querySelector('.ln[data-i="'+g.dataset.go+'"]'); if (el) c.scrollTop = el.offsetTop - 60; }
+    else { const rr = R.getBoundingClientRect(); c.scrollTop = (e.clientY - rr.top) / rr.height * c.scrollHeight - c.clientHeight/2; }
+  };
+}
+function jumpHunk(d){
+  const c = $('#code'); if (!c || !hunks.length) return;
+  hunkIdx = (hunkIdx + d + hunks.length) % hunks.length;
+  const el = c.querySelector('.ln[data-i="'+hunks[hunkIdx]+'"]');
+  if (el){ c.scrollTop = el.offsetTop - 60; c.querySelectorAll('.ln.cur').forEach(x => x.classList.remove('cur')); el.classList.add('cur'); }
+}
+
+/* ---------------- painel inferior ---------------- */
+function btabs(){
+  const t = [{k:'instr', n: state.cur ? 'Instruções — '+D.files[state.cur].name : 'Instruções'}, {k:'out', n:'Output'}, {k:'tests', n:'Testes'}, {k:'help', n:'Problemas comuns'}];
+  return t;
+}
+function renderBottom(){
+  $('#btabs').innerHTML = btabs().map(t => '<button class="ptab'+(state.btab===t.k?' on':'')+'" data-k="'+t.k+'" role="tab">'+esc(t.n)+'</button>').join('') + '<span class="grow"></span>';
+  const B = $('#bbody');
+  if (state.btab === 'instr') B.innerHTML = '<div class="doc">'+instrHtml()+'</div>';
+  else if (state.btab === 'out') B.innerHTML = outHtml();
+  else if (state.btab === 'tests') B.innerHTML = '<div class="doc">'+D.testsHtml[state.ver]+'</div>';
+  else B.innerHTML = '<div class="doc">'+D.helpHtml[state.ver]+'</div>';
+  B.scrollTop = 0;
+}
+$('#btabs').addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b){ state.btab = b.dataset.k; renderBottom(); } });
+$('#bbody').addEventListener('click', e => {
+  const l = e.target.closest('[data-open]'); if (l){ openFile(l.dataset.open); return; }
+  const o = e.target.closest('[data-out]'); if (o){ state.out = +o.dataset.out; renderBottom(); return; }
+  const st = e.target.closest('[data-step]'); if (st){ const i = +st.dataset.step; const s = steps()[i]; state.step = i; if (s.file) openFile(s.file, true); else { state.btab = s.tab||'instr'; if (s.out!=null) state.out = s.out; renderBottom(); } renderSteps(); }
+});
+function instrHtml(){
+  const s = state.step != null ? steps()[state.step] : null;
+  if (s && !s.file && s.html) return s.html;
+  if (!state.cur) return V().intro;
+  const f = D.files[state.cur], st = fileStatus(state.ver, state.cur);
+  const ins = (f.instr && f.instr[state.ver]) || '';
+  const head = '<h3>'+(st==='novo'?'<span class="tag novo">NOVO</span>':st==='alterado'?'<span class="tag alterado">ALTERAR</span>':'<span class="tag" style="border:1px solid var(--line2)">SEM ALTERAÇÃO</span>')+esc(f.name)+' <span style="font-weight:400;color:var(--muted);font-size:12px">· '+f.proj+'</span></h3><span class="path">'+esc(f.full)+'</span>';
+  return head + (ins || (st==='igual' ? '<p>Este arquivo continua igual ao projeto da aula. Não precisa mexer.</p>' : ''));
+}
+function outHtml(){
+  const outs = V().outputs;
+  if (state.out >= outs.length) state.out = 0;
+  const o = outs[state.out];
+  const body = o.lines.map(l => {
+    if (l.startsWith('# ')) return '<span class="cmt">'+esc(l.slice(2))+'</span>';
+    let c = /NOT_FOUND|UNAVAILABLE|Exception|não/i.test(l) ? 'err' : /no ar|iniciad|registrad|Registrad|Localizad|sucesso|senha [NP]-|Senha [NP]-/.test(l) ? 'ok' : /Removid|ENTER|Encerrando/.test(l) ? 'info' : '';
+    return c ? '<span class="'+c+'">'+esc(l)+'</span>' : esc(l);
+  }).join('\n');
+  return '<div class="outtabs">'+outs.map((x,i) => '<button class="'+(i===state.out?'on':'')+'" data-out="'+i+'">'+esc(x.tab)+'</button>').join('')+'</div><pre class="console">'+body+'</pre>';
+}
+
+/* ---------------- status bar ---------------- */
+function renderStatus(){
+  let nN = 0, nA = 0;
+  Object.keys(D.files).forEach(id => { const s = statusOf(id); if (s==='novo') nN++; else if (s==='alterado') nA++; });
+  $('#status').innerHTML = '<span><b style="color:var(--addText)">'+nN+' novos</b> · <b style="color:var(--modText)">'+nA+' alterados</b></span><span class="grow"></span><span id="pos">1:1</span><span>INS</span><span>UTF-8</span>';
+  $('#wintitle').textContent = (state.cur ? D.files[state.cur].name + ' — ' : '') + 'Central de Senhas · Serviço de Nomes';
+}
+
+/* ---------------- util ---------------- */
+let toastT;
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), 1400); }
+function copy(text, msg, btn){
+  const ok = () => { toast(msg); marcar(btn, true); };
+  const falhou = () => { toast('Não deu para copiar: selecione o código e use Ctrl+C'); marcar(btn, false); };
+  if (navigator.clipboard && window.isSecureContext !== false) navigator.clipboard.writeText(text).then(ok, fallback); else fallback();
+  function fallback(){
+    const a = document.createElement('textarea'); a.value = text; a.style.position = 'fixed'; a.style.opacity = '0';
+    document.body.appendChild(a); a.select(); let deu = false;
+    try { deu = document.execCommand('copy'); } catch(e){}
+    a.remove(); deu ? ok() : falhou();
+  }
+}
+/* O botão clicado vira "✓ Copiado!" por um instante e depois volta ao normal */
+function marcar(btn, deu){
+  if (!btn) return;
+  clearTimeout(btn._t);
+  if (btn._orig == null){ btn._orig = btn.innerHTML; btn.style.minWidth = btn.offsetWidth + 'px'; }
+  btn.classList.remove('copied', 'copyfail'); void btn.offsetWidth;  // reinicia a animação em cliques seguidos
+  btn.classList.add(deu ? 'copied' : 'copyfail');
+  btn.innerHTML = deu ? IC.check + 'Copiado!' : IC.fail + 'Não copiou';
+  btn._t = setTimeout(() => { btn.innerHTML = btn._orig; btn._orig = null; btn.classList.remove('copied', 'copyfail'); btn.style.minWidth = ''; }, 1600);
+}
+let popEl = null;
+function showPop(anchor, title, text){
+  closePop();
+  popEl = document.createElement('div'); popEl.className = 'pop';
+  popEl.innerHTML = '<div class="ph"><span>'+esc(title)+'</span><button aria-label="Fechar">✕</button></div><pre>'+esc(text)+'</pre>';
+  document.body.appendChild(popEl);
+  const r = anchor.getBoundingClientRect();
+  popEl.style.left = Math.min(r.left + 10, innerWidth - popEl.offsetWidth - 10) + 'px';
+  popEl.style.top = Math.min(r.bottom + 4, innerHeight - popEl.offsetHeight - 10) + 'px';
+  popEl.querySelector('button').onclick = closePop;
+}
+function closePop(){ if (popEl){ popEl.remove(); popEl = null; } }
+document.addEventListener('mousedown', e => { if (popEl && !popEl.contains(e.target) && !e.target.closest('[data-old],[data-del]')) closePop(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closePop();
+  if (e.altKey && e.key === 'ArrowDown'){ e.preventDefault(); jumpHunk(1); }
+  if (e.altKey && e.key === 'ArrowUp'){ e.preventDefault(); jumpHunk(-1); }
+});
+
+/* ---------------- toolbar actions ---------------- */
+$('#btnBuild').onclick = () => { const i = steps().findIndex(s => /Clean and Build/.test(s.title)); if (i>=0){ state.step = i; state.btab = 'instr'; renderSteps(); renderBottom(); } };
+$('#btnRun').onclick = () => { state.btab = 'out'; renderBottom(); };
+$('#btnTheme').onclick = () => {
+  const cur = document.documentElement.getAttribute('data-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  const nx = cur === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', nx); SS('theme', nx);
+};
+$('#btnTree').onclick = () => $('#left').classList.toggle('open');
+
+/* ---------------- splitters ---------------- */
+function drag(el, onMove){
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault(); el.setPointerCapture(e.pointerId);
+    const mv = ev => onMove(ev); const up = () => { el.removeEventListener('pointermove', mv); el.removeEventListener('pointerup', up); };
+    el.addEventListener('pointermove', mv); el.addEventListener('pointerup', up);
+  });
+}
+drag($('#vsplit'), e => { const w = Math.min(Math.max(220, e.clientX), innerWidth*0.5); $('#main').style.setProperty('--leftw', w+'px'); });
+drag($('#botsplit'), e => { const r = $('#center').getBoundingClientRect(); const h = Math.min(Math.max(80, r.bottom - e.clientY), r.height - 120); $('#center').style.setProperty('--both', h+'px'); });
+drag($('#navsplit'), e => { const r = $('#left').getBoundingClientRect(); const h = Math.min(Math.max(80, r.bottom - e.clientY), r.height - 100); $('#left').style.setProperty('--navh', h+'px'); });
+
+/* ---------------- start ---------------- */
+const hp = new URLSearchParams(location.hash.slice(1));
+const saved = hp.get('f') || LS('cur');
+const startFile = (saved && D.files[saved] && visible(saved)) ? saved : (steps().find(s => s.file) || {}).file;
+if (startFile){ state.open.push(startFile); state.cur = startFile; const i = steps().findIndex(s => s.file === startFile); state.step = i >= 0 ? i : null; }
+renderToolbar(); renderTree(); renderTabs(); renderEditor(); renderSteps(); renderBottom(); renderStatus();
+})();
+</script>
+</body>
+</html>

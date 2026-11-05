@@ -1,0 +1,48 @@
+syntax = "proto3";
+package atendimento;
+option java_package = "com.mycompany.atendimentorpc";
+option java_multiple_files = true;
+
+service AtendimentoService {
+    rpc PegarSenha (PedidoSenha) returns (Senha);
+}
+
+service ServicoNomes {
+    rpc Registrar (Registro) returns (Vazio);  // a Central entra ao subir
+    rpc Localizar (Nome) returns (Endereco);   // o totem pergunta antes de conectar
+    rpc Remover (Nome) returns (Vazio);        // a Central sai ao encerrar
+}
+
+enum TipoAtendimento {
+    NORMAL = 0;
+    PRIORITARIO = 1;
+}
+
+message PedidoSenha {
+    string nome = 1;
+    TipoAtendimento tipo = 2;
+    string local = 3;
+}
+
+message Senha {
+    int32 numero = 1;
+    string codigo = 2;
+    string mensagem = 3;
+}
+
+message Registro {
+    string nome = 1;
+    string host = 2;
+    int32 porta = 3;
+}
+
+message Nome {
+    string nome = 1;
+}
+
+message Endereco {
+    string host = 1;
+    int32 porta = 2;
+}
+
+message Vazio {}
